@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Калькулятор рамок</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --card-bg: #2a2a2a;
+            --text-main: #ffffff;
+            --text-muted: #888888;
+            --border-color: #444444;
+            --accent: #0ea5e9;
+            --accent2: #a855f7;
+            --gradient: linear-gradient(135deg, #0ea5e9, #a855f7);
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            margin: 0; padding: 15px;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding-bottom: 30px;
+        }
+
+        /* Заголовок */
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; padding: 0 5px;
+        }
+        .header h1 { font-size: 20px; font-weight: 800; margin: 0; }
+        .settings-btn { background: none; border: none; color: white; font-size: 22px; cursor: pointer; }
+
+        /* Типы фигур */
+        .shapes-scroll {
+            display: flex; gap: 10px; overflow-x: auto;
+            padding-bottom: 10px; margin-bottom: 15px;
+            scrollbar-width: none;
+        }
+        .shapes-scroll::-webkit-scrollbar { display: none; }
+        .shape-btn {
+            flex: 0 0 60px; height: 60px;
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s; color: var(--text-muted);
+        }
+        .shape-btn.active {
+            background: rgba(14,165,233,0.1); border-color: var(--accent); color: var(--accent);
+            box-shadow: 0 0 10px rgba(14,165,233,0.2);
+        }
+        .shape-btn svg { width: 32px; height: 32px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+        /* Экран предпросмотра (условный) */
+        .preview-box {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 16px; height: 180px; display: flex; align-items: center; justify-content: center;
+            margin-bottom: 20px; color: var(--text-muted); font-size: 14px; text-align: center;
+            position: relative; overflow: hidden;
+        }
+
+        /* Поля ввода */
+        .inputs-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+        .input-row { display: flex; gap: 10px; }
+        .input-group { flex: 1; position: relative; }
+        .input-group label {
+            position: absolute; top: -8px; left: 10px;
+            background: var(--bg-color); padding: 0 4px;
+            font-size: 12px; color: var(--text-muted);
+        }
+        .input-group input {
+            width: 100%; background: transparent; border: 1px solid var(--border-color);
+            color: white; padding: 12px; border-radius: 8px; font-size: 16px;
+            outline: none; font-family: inherit;
+        }
+        .input-group input:focus { border-color: var(--accent); }
+
+        /* Результаты */
+        .results-card {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 16px; padding: 20px; display: none;
+        }
+        .results-card.active { display: block; }
+        .results-header { display: flex; justify-content: space-between; margin-bottom: 15px; }
+        .results-title { font-size: 16px; font-weight: bold; color: #ccc; }
+        .results-save { font-size: 14px; color: #22c55e; cursor: pointer; background: none; border: none; }
+        .results-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 15px; }
+
+        .result-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .result-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .result-label { font-size: 14px; color: #aaa; }
+        .result-value { font-size: 16px; font-weight: bold; text-align: right; }
+        .result-angle { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+        .hint { font-size: 12px; color: var(--text-muted); margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.06); line-height: 1.4; }
+
+        /* Модалка настроек */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            z-index: 1000; justify-content: center; align-items: center; padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: rgba(30, 30, 40, 0.9); border: 1px solid rgba(255,255,255,0.1);
+            width: 100%; max-width: 340px; border-radius: 20px; padding: 20px;
+        }
+        .modal h2 { margin: 0 0 20px 0; font-size: 18px; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+        .btn-text { background: none; border: none; color: var(--text-muted); font-size: 14px; cursor: pointer; }
+        .btn-save { background: var(--gradient); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Калькулятор рамок</h1>
+        <button class="settings-btn" onclick="openSettings()">⋮</button>
+    </div>
+
+    <!-- Переключатель фигур -->
+    <div class="shapes-scroll" id="shapesContainer">
+        <div class="shape-btn active" data-shape="trapezoid" onclick="selectShape('trapezoid')">
+            <svg viewBox="0 0 24 24"><path d="M4 6 L20 6 L16 18 L8 18 Z"/></svg>
+        </div>
+        <div class="shape-btn" data-shape="triangle" onclick="selectShape('triangle')">
+            <svg viewBox="0 0 24 24"><path d="M12 4 L20 20 L4 20 Z"/></svg>
+        </div>
+        <div class="shape-btn" data-shape="rightTriangle" onclick="selectShape('rightTriangle')">
+            <svg viewBox="0 0 24 24"><path d="M4 4 L4 20 L20 20 Z"/></svg>
+        </div>
+        <div class="shape-btn" data-shape="oneSlant" onclick="selectShape('oneSlant')">
+            <svg viewBox="0 0 24 24"><path d="M4 6 L16 6 L20 18 L4 18 Z"/></svg>
+        </div>
+        <div class="shape-btn" data-shape="fiveAngles" onclick="selectShape('fiveAngles')">
+            <svg viewBox="0 0 24 24"><path d="M4 6 L20 6 L20 18 L10 18 L4 12 Z"/></svg>
+        </div>
+    </div>
+
+    <!-- Предпросмотр -->
+    <div class="preview-box" id="previewBox">
+        Введите размеры стекла
+    </div>
+
+    <!-- Поля ввода -->
+    <div class="inputs-container" id="inputsContainer">
+        <!-- Поля будут генерироваться через JS -->
+    </div>
+
+    <!-- Результаты -->
+    <div class="results-card" id="resultsCard">
+        <div class="results-header">
+            <div class="results-title">Размеры рамки</div>
+            <button class="results-save" onclick="showToast('Скопировано!')">Сохранить</button>
+        </div>
+        <div class="results-sub" id="resultsSub">Фальц 10.0 мм + запил 22.0 мм</div>
+        <div id="resultsList"></div>
+        <div class="hint">* Для запила в стык (угол/2) используйте половину указанного угла.</div>
+    </div>
+
+    <!-- Модалка настроек -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal">
+            <h2>Настройки калькулятора</h2>
+            <div class="input-group" style="margin-bottom: 15px;">
+                <label>Фальц (отступ от края), мм</label>
+                <input type="number" id="inputFalz" value="10.0" step="0.1" oninput="calculate()">
+            </div>
+            <div class="input-group">
+                <label>Смещение пилы (припуск), мм</label>
+                <input type="number" id="inputPila" value="22.0" step="0.1" oninput="calculate()">
+            </div>
+            <div class="modal-actions">
+                <button class="btn-text" onclick="closeSettings()">Отмена</button>
+                <button class="btn-save" onclick="saveSettings()">Сохранить</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+
+        // Настройки
+        let settings = { falz: 10.0, pila: 22.0 };
+        let currentShape = 'trapezoid';
+
+        // Загрузка настроек
+        function loadSettings() {
+            try {
+                const saved = localStorage.getItem('glassSettings');
+                if (saved) settings = JSON.parse(saved);
+            } catch(e) {}
+            document.getElementById('inputFalz').value = settings.falz;
+            document.getElementById('inputPila').value = settings.pila;
+        }
+
+        function saveSettings() {
+            settings.falz = parseFloat(document.getElementById('inputFalz').value) || 10.0;
+            settings.pila = parseFloat(document.getElementById('inputPila').value) || 22.0;
+            localStorage.setItem('glassSettings', JSON.stringify(settings));
+            if (tg.CloudStorage) {
+                tg.CloudStorage.setItem('glassSettings', JSON.stringify(settings), () => {});
+            }
+            closeSettings();
+            calculate();
+        }
+
+        function openSettings() { document.getElementById('settingsModal').classList.add('active'); }
+        function closeSettings() { document.getElementById('settingsModal').classList.remove('active'); }
+
+        // Переключение фигур
+        function selectShape(shape) {
+            currentShape = shape;
+            document.querySelectorAll('.shape-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector(`[data-shape="${shape}"]`).classList.add('active');
+            renderInputs();
+            calculate();
+        }
+
+        // Генерация полей ввода
+        function renderInputs() {
+            const container = document.getElementById('inputsContainer');
+            container.innerHTML = '';
+
+            if (currentShape === 'trapezoid') {
+                container.innerHTML = `
+                    <div class="input-group">
+                        <label>Нижнее основание (мм)</label>
+                        <input type="number" id="inp1" oninput="calculate()">
+                    </div>
+                    <div class="input-group">
+                        <label>Верхнее основание (мм)</label>
+                        <input type="number" id="inp2" oninput="calculate()">
+                    </div>
+                    <div class="input-group">
+                        <label>Высота (мм)</label>
+                        <input type="number" id="inp3" oninput="calculate()">
+                    </div>
+                `;
+            } else if (currentShape === 'triangle') {
+                container.innerHTML = `
+                    <div class="input-group">
+                        <label>Низ (основание) (мм)</label>
+                        <input type="number" id="inp1" oninput="calculate()">
+                    </div>
+                    <div class="input-group">
+                        <label>Медиана (высота) (мм)</label>
+                        <input type="number" id="inp2" oninput="calculate()">
+                    </div>
+                `;
+            } else if (currentShape === 'rightTriangle') {
+                container.innerHTML = `
+                    <div class="input-group">
+                        <label>Горизонтальный катет (мм)</label>
+                        <input type="number" id="inp1" oninput="calculate()">
+                    </div>
+                    <div class="input-group">
+                        <label>Вертикальный катет (мм)</label>
+                        <input type="number" id="inp2" oninput="calculate()">
+                    </div>
+                `;
+            } else if (currentShape === 'oneSlant') {
+                container.innerHTML = `
+                    <div class="input-group">
+                        <label>Низ (мм)</label>
+                        <input type="number" id="inp1" oninput="calculate()">
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Левая высота</label>
+                            <input type="number" id="inp2" oninput="calculate()">
+                        </div>
+                        <div class="input-group">
+                            <label>Правая высота</label>
+                            <input type="number" id="inp3" oninput="calculate()">
+                        </div>
+                    </div>
+                `;
+            } else if (currentShape === 'fiveAngles') {
+                container.innerHTML = `
+                    <div class="input-group">
+                        <label>Низ (мм)</label>
+                        <input type="number" id="inp1" oninput="calculate()">
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Правая высота</label>
+                            <input type="number" id="inp2" oninput="calculate()">
+                        </div>
+                        <div class="input-group">
+                            <label>Левая высота</label>
+                            <input type="number" id="inp3" oninput="calculate()">
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Верх (мм)</label>
+                        <input type="number" id="inp4" oninput="calculate()">
+                    </div>
+                `;
+            }
+        }
+
+        // Логика расчёта
+        function calculate() {
+            const falz = settings.falz;
+            const pila = settings.pila;
+            const totalOffset = pila - falz; // 22 - 10 = 12 (прибавляется к внутреннему размеру)
+
+            let results = [];
+            let valid = false;
+
+            const v = (id) => parseFloat(document.getElementById(id)?.value);
+
+            if (currentShape === 'trapezoid') {
+                const b = v('inp1'), t = v('inp2'), h = v('inp3');
+                if (b && t && h) {
+                    valid = true;
+                    const diff = (b - t) / 2;
+                    const slant = Math.sqrt(diff*diff + h*h);
+                    const angleRad = Math.atan2(h, diff);
+                    const angleDeg = 180 - (angleRad * 180 / Math.PI); // Угол при основании
+                    
+                    results = [
+                        { label: 'Низ', val: b + totalOffset, angle: 90 },
+                        { label: 'Правая боковая', val: slant + totalOffset, angle: 90 - (angleDeg - 90) },
+                        { label: 'Верх', val: t + totalOffset, angle: 90 },
+                        { label: 'Левая боковая', val: slant + totalOffset, angle: 90 - (angleDeg - 90) }
+                    ];
+                }
+            } else if (currentShape === 'triangle') {
+                const b = v('inp1'), h = v('inp2');
+                if (b && h) {
+                    valid = true;
+                    const half = b / 2;
+                    const side = Math.sqrt(half*half + h*h);
+                    const angleRad = Math.atan2(h, half);
+                    const angleDeg = angleRad * 180 / Math.PI;
+                    
+                    results = [
+                        { label: 'Низ (основание)', val: b + totalOffset, angle: 90 },
+                        { label: 'Правая сторона', val: side + totalOffset, angle: angleDeg },
+                        { label: 'Левая сторона', val: side + totalOffset, angle: angleDeg }
+                    ];
+                }
+            } else if (currentShape === 'rightTriangle') {
+                const a = v('inp1'), b = v('inp2');
+                if (a && b) {
+                    valid = true;
+                    const c = Math.sqrt(a*a + b*b);
+                    const angleA = Math.atan2(b, a) * 180 / Math.PI;
+                    const angleB = 90 - angleA;
+                    
+                    results = [
+                        { label: 'Катет A', val: a + totalOffset, angle: 90 },
+                        { label: 'Гипотенуза', val: c + totalOffset, angle: angleA },
+                        { label: 'Катет B', val: b + totalOffset, angle: 90 }
+                    ];
+                }
+            } else if (currentShape === 'oneSlant') {
+                const bottom = v('inp1'), leftH = v('inp2'), rightH = v('inp3');
+                if (bottom && leftH && rightH) {
+                    valid = true;
+                    const diff = Math.abs(leftH - rightH);
+                    const top = Math.sqrt(bottom*bottom + diff*diff);
+                    const angleDeg = Math.atan2(diff, bottom) * 180 / Math.PI;
+                    
+                    results = [
+                        { label: 'Низ', val: bottom + totalOffset, angle: 90 },
+                        { label: 'Правая', val: rightH + totalOffset, angle: 90 },
+                        { label: 'Верхняя (наклон)', val: top + totalOffset, angle: angleDeg },
+                        { label: 'Левая', val: leftH + totalOffset, angle: 90 }
+                    ];
+                }
+            } else if (currentShape === 'fiveAngles') {
+                const bottom = v('inp1'), rightH = v('inp2'), leftH = v('inp3'), top = v('inp4');
+                if (bottom && rightH && leftH && top) {
+                    valid = true;
+                    // Тут сложная геометрия для пятиугольника, упрощаю:
+                    const diff = Math.abs(rightH - leftH);
+                    const side = Math.sqrt(top*top + diff*diff); // Примерно
+                    const angleDeg = Math.atan2(diff, top) * 180 / Math.PI;
+                    
+                    results = [
+                        { label: 'Низ', val: bottom + totalOffset, angle: 90 },
+                        { label: 'Правая', val: rightH + totalOffset, angle: 90 },
+                        { label: 'Верх', val: top + totalOffset, angle: 90 },
+                        { label: 'Верхняя (наклон)', val: side + totalOffset, angle: angleDeg },
+                        { label: 'Левая', val: leftH + totalOffset, angle: 90 }
+                    ];
+                }
+            }
+
+            renderResults(results, valid);
+        }
+
+        function renderResults(results, valid) {
+            const card = document.getElementById('resultsCard');
+            const sub = document.getElementById('resultsSub');
+            const list = document.getElementById('resultsList');
+
+            if (!valid) {
+                card.classList.remove('active');
+                return;
+            }
+
+            card.classList.add('active');
+            sub.innerText = `Фальц ${settings.falz.toFixed(1)} мм + запил ${settings.pila.toFixed(1)} мм`;
+            
+            list.innerHTML = '';
+            results.forEach(r => {
+                const angleText = r.angle < 90 ? `Угол: ${r.angle.toFixed(1)}°` : 'Угол: 90,0°';
+                list.innerHTML += `
+                    <div class="result-item">
+                        <div>
+                            <div class="result-label">${r.label}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="result-value">${r.val.toFixed(1)} мм</div>
+                            ${r.angle ? `<div class="result-angle">${angleText}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function showToast(msg) {
+            // Простая заглушка вместо тоста, чтобы не перегружать код
+            alert(msg);
+        }
+
+        // Инициализация
+        loadSettings();
+        renderInputs();
+    </script>
+</body>
+</html>
