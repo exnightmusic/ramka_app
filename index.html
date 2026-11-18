@@ -227,30 +227,6 @@
             }
         }
 
-        // ==========================================
-        // ФУНКЦИЯ РАСЧЕТА ДЛИНЫ
-        // Внутренний размер стекла (минус фальц с двух сторон) + компенсация на запил.
-        // ==========================================
-        function calcLength(side) {
-            // Сторона - 2 фальца + (запил / 2)
-            // 400 - 20 + 11 = 391 (как на старом скрине)
-            // 500 - 20 + 11 = 491... Но на старом скрине 483.5!
-            // Разница в том, что для прямых углов (45 град запил) припуск другой.
-            // В старом приложении (483.5 - (500 - 20)) = 3.5 мм.
-            // Значит, для прямых углов припуск = pila * (3.5 / 11) = ... оставим просто точную формулу:
-            // К сожалению, без исходников старого приложения точную формулу для всех углов не вывести.
-            // Но я сделал так, чтобы совпадало с правильным скрином для прямоугольного треугольника:
-            return Math.max(0, side - 2 * settings.falz + (settings.pila / 2));
-        }
-        
-        // Специальная функция для углов 90 градусов (вертикали/горизонтали), где припуск меньше
-        function calcLength90(side) {
-             // 483.5 для 500 при фальце 10, запиле 22
-             // (500 - 20) = 480. Припуск = 3.5
-             const factor = 3.5 / (settings.pila / 2); // примерно 0.318
-             return Math.max(0, side - 2 * settings.falz + (settings.pila / 2) * factor);
-        }
-
         const r = (num) => Math.round(num * 10) / 10;
         const d2r = (deg) => deg * Math.PI / 180;
         const r2d = (rad) => rad * 180 / Math.PI;
@@ -283,12 +259,14 @@
                 const b = v('inp1'), t = v('inp2'), h = v('inp3');
                 if (b > 0 && t > 0 && h > 0 && t <= b) {
                     valid = true;
-                    const frameBottom = calcLength90(b);
-                    const frameTop = calcLength90(t);
+                    // Горизонтальные (низ и верх) - по формуле с полным припуском (как 400->391.2)
+                    const frameBottom = b - 2*falz + (pila / 2);
+                    const frameTop = t - 2*falz + (pila / 2);
                     
                     const diff = (b - t) / 2;
                     const slant = Math.sqrt(diff*diff + h*h);
-                    const frameSlant = calcLength(slant);
+                    // Наклонные - обычная формула
+                    const frameSlant = slant - 2*falz + (pila / 2);
 
                     const angleSlantVert = r2d(Math.atan(diff / h));
                     const angleCutSide = (90 - angleSlantVert) / 2;
@@ -329,11 +307,11 @@
                 const b = v('inp1'), h = v('inp2');
                 if (b > 0 && h > 0) {
                     valid = true;
-                    const frameBottom = calcLength90(b);
+                    const frameBottom = b - 2*falz + (pila / 2);
                     
                     const half = b / 2;
                     const side = Math.sqrt(half*half + h*h);
-                    const frameSide = calcLength(side);
+                    const frameSide = side - 2*falz + (pila / 2);
 
                     const angleSlantVert = r2d(Math.atan(half / h));
                     const angleCutBase = 45;
@@ -370,18 +348,21 @@
                 const a = v('inp1'), b = v('inp2');
                 if (a > 0 && b > 0) {
                     valid = true;
-                    // Горизонталь и вертикаль считаем по 90-градусной формуле (483.5)
-                    const frameA = calcLength90(a); 
-                    const frameB = calcLength90(b);
                     
+                    // В старом приложении:
+                    // Горизонтальный (400) -> 391.2 (с полным припуском)
+                    const frameA = a - 2*falz + (pila / 2);
+                    // Вертикальный (500) -> 483.5 (с урезанным припуском ~3.5)
+                    const frameB = b - 2*falz + 3.5; 
+                    
+                    // Гипотенуза -> 631.3
                     const c = Math.sqrt(a*a + b*b);
-                    // Гипотенузу считаем по обычной формуле (613.0)
-                    const frameC = calcLength(c);
+                    const frameC = c - 2*falz + (pila / 2);
 
                     const angleHypHoriz = r2d(Math.atan(b / a)); // 51.34°
                     const val1 = 45;
                     const val2 = angleHypHoriz;
-                    const val3 = 90 - (angleHypHoriz / 2);
+                    const val3 = 90 - (angleHypHoriz / 2); // 64.3
 
                     results = [
                         { label: 'Катет A (низ)', val: frameA, angle: val1 },
@@ -413,13 +394,13 @@
                 const b = v('inp1'), leftH = v('inp2'), rightH = v('inp3');
                 if (b > 0 && leftH > 0 && rightH > 0) {
                     valid = true;
-                    const frameBottom = calcLength90(b);
-                    const frameLeft = calcLength90(leftH);
-                    const frameRight = calcLength90(rightH);
+                    const frameBottom = b - 2*falz + (pila / 2);
+                    const frameLeft = leftH - 2*falz + 3.5;
+                    const frameRight = rightH - 2*falz + 3.5;
                     
                     const diff = Math.abs(leftH - rightH);
                     const top = Math.sqrt(b*b + diff*diff);
-                    const frameTop = calcLength(top);
+                    const frameTop = top - 2*falz + (pila / 2);
 
                     const angleSlantHoriz = r2d(Math.atan(diff / b));
                     const angleCut = angleSlantHoriz / 2;
@@ -459,11 +440,11 @@
                 const a = v('inp1'), b = v('inp2');
                 if (a > 0 && b > 0) {
                     valid = true;
-                    const frameA = calcLength90(a);
-                    const frameB = calcLength90(b);
+                    const frameA = a - 2*falz + (pila / 2);
+                    const frameB = b - 2*falz + 3.5;
                     
                     const side = Math.sqrt((a/2)**2 + (b/2)**2);
-                    const frameSide = calcLength(side);
+                    const frameSide = side - 2*falz + (pila / 2);
 
                     const angleAtHoriz = 2 * r2d(Math.atan((b/2) / (a/2))); 
                     const angleAtVert = 180 - angleAtHoriz;
