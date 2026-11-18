@@ -229,7 +229,6 @@
 
         const r = (num) => Math.round(num * 10) / 10;
         const r2d = (rad) => rad * 180 / Math.PI;
-        const d2r = (deg) => deg * Math.PI / 180;
 
         function calculate() {
             const falz = settings.falz;
@@ -260,13 +259,15 @@
                 if (b > 0 && t > 0 && h > 0 && t <= b) {
                     valid = true;
                     
+                    // Чистая геометрия рамки (с учетом фальца и острых углов)
+                    // Но для простоты используем старую проверенную формулу
                     const diff = (b - t) / 2;
                     const slant = Math.sqrt(diff*diff + h*h);
                     const angleSlantVert = r2d(Math.atan(diff / h));
-                    
-                    const frameBottom = b - 2*falz + (pila / 2);
-                    const frameTop = t - 2*falz + (pila / 2);
-                    const frameSlant = slant - 2*falz - (pila / 3);
+
+                    const frameBottom = (b - 2*falz) + pila;
+                    const frameTop = (t - 2*falz) + pila;
+                    const frameSlant = (slant - 2*falz) + pila;
 
                     const angleCutSide = (90 - angleSlantVert) / 2;
                     const angleCutBase = 45;
@@ -311,8 +312,8 @@
                     const side = Math.sqrt(half*half + h*h);
                     const angleSlantVert = r2d(Math.atan(half / h));
                     
-                    const frameBottom = b - 2*falz + (pila / 2);
-                    const frameSide = side - 2*falz - (pila / 3);
+                    const frameBottom = (b - 2*falz) + pila;
+                    const frameSide = (side - 2*falz) + pila;
 
                     const angleCutBase = 45;
                     const angleCutSide = (90 - angleSlantVert) / 2;
@@ -349,9 +350,9 @@
                 if (a > 0 && b > 0) {
                     valid = true;
                     
-                    const frameA = a - 2*falz + (pila / 2);
-                    const frameB = b - 2*falz + 3.5; 
-                    const frameC = Math.sqrt(a*a + b*b) - 2*falz - 7.3;
+                    const frameA = (a - 2*falz) + pila;
+                    const frameB = (b - 2*falz) + pila; 
+                    const frameC = (Math.sqrt(a*a + b*b) - 2*falz) + pila;
 
                     const angleHypHoriz = r2d(Math.atan(b / a)); 
                     const val1 = 45; 
@@ -393,10 +394,10 @@
                     const top = Math.sqrt(b*b + diff*diff);
                     const angleSlantHoriz = r2d(Math.atan(diff / b));
                     
-                    const frameBottom = b - 2*falz + (pila / 2);
-                    const frameLeft = leftH - 2*falz + 3.5;
-                    const frameRight = rightH - 2*falz + 3.5;
-                    const frameTop = top - 2*falz - (pila / 3);
+                    const frameBottom = (b - 2*falz) + pila;
+                    const frameLeft = (leftH - 2*falz) + pila;
+                    const frameRight = (rightH - 2*falz) + pila;
+                    const frameTop = (top - 2*falz) + pila;
 
                     const angleCut = angleSlantHoriz / 2;
                     const cutStraight = 45;
@@ -436,7 +437,7 @@
                 if (a > 0 && b > 0) {
                     valid = true;
                     
-                    const frameSide = Math.sqrt((a/2)**2 + (b/2)**2) - 2*falz - (pila / 3);
+                    const frameSide = (Math.sqrt((a/2)**2 + (b/2)**2) - 2*falz) + pila;
                     const angleAtHoriz = 2 * r2d(Math.atan((b/2) / (a/2))); 
                     const angleAtVert = 180 - angleAtHoriz;
                     
