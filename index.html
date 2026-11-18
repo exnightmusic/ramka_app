@@ -38,7 +38,6 @@
         .shape-btn.active { background: rgba(14,165,233,0.1); border-color: var(--accent); color: var(--accent); box-shadow: 0 0 10px rgba(14,165,233,0.2); }
         .shape-btn svg { width: 32px; height: 32px; stroke: currentColor; fill: none; stroke-width: 2; }
 
-        /* Увеличенный макет и отступы для цифр */
         .preview-box {
             background: var(--card-bg); border: 1px solid var(--border-color);
             border-radius: 16px; height: 340px; display: flex; align-items: center; justify-content: center;
@@ -46,7 +45,6 @@
         }
         .preview-box svg { width: 100%; height: 100%; }
         
-        /* Панель управления под макетом */
         .controls-row {
             display: flex; justify-content: space-around; align-items: center;
             background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px;
@@ -134,7 +132,6 @@
         Введите размеры стекла
     </div>
 
-    <!-- НОВАЯ ПАНЕЛЬ УПРАВЛЕНИЯ -->
     <div class="controls-row">
         <button class="ctrl-btn" onclick="rotateShape(-90)">
             <span>↺</span>
@@ -346,7 +343,6 @@
             return newPoly;
         }
 
-        // Трансформация (поворот и отзеркаливание)
         function transformPoly(poly) {
             let p = poly;
             if (mirror) {
@@ -383,7 +379,6 @@
             let rawPoly = null;
             let labels = [];
 
-            // 1. Формируем исходный полигон (стекло)
             if (currentShape === 'trapezoid') {
                 const b = v('inp1'), t = v('inp2'), h = v('inp3');
                 if (b > 0 && t > 0 && h > 0) {
@@ -437,7 +432,6 @@
             }
 
             if (valid && rawPoly) {
-                // 2. Смещаем внутрь (фальц)
                 const innerPoly = offsetPolygon(rawPoly, falz);
                 if (!innerPoly) {
                     document.getElementById('previewBox').innerHTML = 'Ошибка геометрии (слишком большой фальц)';
@@ -445,18 +439,15 @@
                     return;
                 }
 
-                // 3. Трансформация (поворот/зеркало)
                 const transformedInner = transformPoly(innerPoly);
                 const transformedOuter = transformPoly(rawPoly);
 
-                // 4. Считаем длины и углы
                 const N = innerPoly.length;
                 for (let i = 0; i < N; i++) {
                     const p1 = innerPoly[i];
                     const p2 = innerPoly[(i + 1) % N];
                     const len = Math.sqrt((p2.x - p1.x)**2 + (p2.y - p1.y)**2);
                     
-                    // Углы стусла
                     const p_prev = innerPoly[(i - 1 + N) % N];
                     const p_next = innerPoly[(i + 2) % N];
                     const v1 = {x: p1.x - p_prev.x, y: p1.y - p_prev.y};
@@ -466,7 +457,6 @@
                     let diff = (a1 - a2) * 180 / Math.PI;
                     if (diff < 0) diff += 360;
                     if (diff > 180) diff = 360 - diff;
-                    const cutAngle = diff / 2; // Угол стусла
 
                     results.push({
                         label: labels[i] || `Сторона ${i+1}`,
@@ -475,20 +465,25 @@
                     });
                 }
 
-                // 5. Отрисовка схемы
+                // --- ИСПРАВЛЕННОЕ ЦЕНТРИРОВАНИЕ И ОТРИСОВКА ---
                 const allPts = [...transformedOuter, ...transformedInner];
                 const minX = Math.min(...allPts.map(p => p.x));
                 const maxX = Math.max(...allPts.map(p => p.x));
                 const minY = Math.min(...allPts.map(p => p.y));
                 const maxY = Math.max(...allPts.map(p => p.y));
-                const maxDim = Math.max(maxX - minX, maxY - minY, 1);
                 
-                // Увеличенный масштаб (снаружи для цифр)
-                const scale = 240 / maxDim;
-                const offsetX = 150 - (minX + maxX) / 2 * scale;
-                const offsetY = 120 - (minY + maxY) / 2 * scale;
+                const wBox = maxX - minX;
+                const hBox = maxY - minY;
+                const maxDim = Math.max(wBox, hBox, 1);
+                
+                // Масштаб 0.55 гарантирует, что фигура займет ~55% от размера макета, оставляя место для подписей
+                const scale = (280 / maxDim) * 0.55;
+                
+                // Центр фигуры в координатах макета (150, 170)
+                const cx = 150 - ((minX + maxX) / 2) * scale;
+                const cy = 170 + ((minY + maxY) / 2) * scale;
 
-                const toSvg = (p) => ({ x: p.x * scale + offsetX, y: -p.y * scale + offsetY });
+                const toSvg = (p) => ({ x: p.x * scale + cx, y: -p.y * scale + cy });
 
                 let pathStr = "";
                 transformedOuter.forEach((p, i) => {
@@ -497,19 +492,17 @@
                 });
                 pathStr += "Z";
 
-                let svg = `<svg viewBox="0 0 300 240">
+                let svg = `<svg viewBox="0 0 300 340">
                     <path d="${pathStr}" fill="none" stroke="#888" stroke-width="3"/>`;
                 
-                // Отрисовка размеров снаружи
                 for (let i = 0; i < N; i++) {
                     const p1 = toSvg(transformedInner[i]);
                     const p2 = toSvg(transformedInner[(i + 1) % N]);
                     const midX = (p1.x + p2.x) / 2;
                     const midY = (p1.y + p2.y) / 2;
                     
-                    // Выталкиваем текст наружу от центра
                     const outX = midX - 150;
-                    const outY = midY - 120;
+                    const outY = midY - 170;
                     const d = Math.sqrt(outX*outX + outY*outY) || 1;
                     const textX = midX + (outX / d) * 35;
                     const textY = midY + (outY / d) * 35;
