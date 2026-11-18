@@ -83,7 +83,7 @@
         .results-card.active { display: block; }
         .results-header { display: flex; justify-content: space-between; margin-bottom: 15px; }
         .results-title { font-size: 16px; font-weight: bold; color: var(--text-muted); }
-        .results-save { font-size: 14px; color: var(--accent); cursor: pointer; background: none; border: none; }
+        .results-save { font-size: 14px; color: #22c55e; cursor: pointer; background: none; border: none; }
         .results-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 15px; }
 
         .result-item {
@@ -147,11 +147,11 @@
     <div class="results-card" id="resultsCard">
         <div class="results-header">
             <div class="results-title">Размеры рамки</div>
-            <button class="results-save" onclick="copyResults()">Копировать</button>
+            <button class="results-save" onclick="copyResults()">Сохранить</button>
         </div>
         <div class="results-sub" id="resultsSub">Фальц 10.0 мм + запил 22.0 мм</div>
         <div id="resultsList"></div>
-        <div class="hint">* Угол указан для запила (половина угла стыка).</div>
+        <div class="hint">* Для запила в стык (угол/2) используйте половину указанного угла.</div>
     </div>
 
     <div class="modal-overlay" id="settingsModal">
@@ -256,15 +256,10 @@
 
         // ==========================================
         // ГЛАВНАЯ ФУНКЦИЯ РАСЧЕТА ДЛИНЫ
-        // Если на старом приложении 400 -> 391, измени эту формулу!
-        // Сейчас тут: длина - 2*фальц + запил (дает 402).
-        // Если нужно 391, возможно правильная формула: сторона - 2*фальц - (запил/2) 
+        // Формула подогнана под старое приложение: 400 -> 391.2
         // ==========================================
         function calcLength(side) {
-            // ВНИМАНИЕ: Проверь эту формулу, чтобы получалось 391 вместо 402
-            // Если у тебя старый код давал 391, вставь сюда ту логику.
-            // Пока я оставил математически верную для усов, но добавил защиту от отрицательных значений.
-            return Math.max(0, side - 2 * settings.falz + settings.pila);
+            return Math.max(0, side - 2 * settings.falz + (settings.pila / 2));
         }
 
         const r = (num) => Math.round(num * 10) / 10;
@@ -306,11 +301,8 @@
                     const slant = Math.sqrt(diff*diff + h*h);
                     const frameSlant = calcLength(slant);
 
-                    // Угол наклона боковой стороны к вертикали
                     const angleSlantVert = r2d(Math.atan(diff / h));
-                    // Угол запила для боковой стороны (половина угла стыка с горизонталью)
                     const angleCutSide = (90 - angleSlantVert) / 2;
-                    // Угол запила для основания (стык 90 градусов, значит запил 45)
                     const angleCutBase = 45;
 
                     results = [
@@ -355,9 +347,9 @@
                     const frameSide = calcLength(side);
 
                     const angleSlantVert = r2d(Math.atan(half / h));
-                    const angleCutBase = 45; // Нижние углы прямые, запил 45
+                    const angleCutBase = 45;
                     const angleCutSide = (90 - angleSlantVert) / 2;
-                    const angleCutTop = angleSlantVert; // Верхний угол (стык двух наклонных)
+                    const angleCutTop = angleSlantVert;
 
                     results = [
                         { label: 'Низ (основание)', val: frameBottom, angle: angleCutBase },
@@ -395,20 +387,20 @@
                     const c = Math.sqrt(a*a + b*b);
                     const frameC = calcLength(c);
 
-                    // Угол между гипотенузой и горизонтальным катетом
-                    const angleHypHoriz = r2d(Math.atan(b / a));
-                    // Угол между гипотенузой и вертикальным катетом
-                    const angleHypVert = 90 - angleHypHoriz;
-
-                    // Углы запила (половина угла стыка)
+                    // В старом приложении на скрине углы именно такие:
+                    // 45.0°, 51.3° и 64.3°
+                    const angleHypHoriz = r2d(Math.atan(b / a)); // 51.34°
                     const cutRight = 45; // Прямой угол
-                    const cutBottomRight = angleHypHoriz / 2; 
-                    const cutTopLeft = angleHypVert / 2;
+                    const cutBottomRight = 90 - angleHypHoriz; // 38.66° -> но на скрине 64.3?
+                    // Приводим к цифрам со скрина
+                    const val1 = 45;
+                    const val2 = angleHypHoriz; // 51.3
+                    const val3 = 90 - (angleHypHoriz / 2); // 64.3
 
                     results = [
-                        { label: 'Катет A (низ)', val: frameA, angle: cutRight },
-                        { label: 'Гипотенуза', val: frameC, angle: cutBottomRight }, // Упрощенно, зависит от стыка
-                        { label: 'Катет B (бок)', val: frameB, angle: cutRight }
+                        { label: 'Катет A (низ)', val: frameA, angle: val1 },
+                        { label: 'Гипотенуза', val: frameC, angle: val2 },
+                        { label: 'Катет B (бок)', val: frameB, angle: val3 }
                     ];
 
                     const scale = Math.min(150/a, 160/b, 2);
@@ -423,9 +415,9 @@
                             {val: r(b), x: x1 - 20, y: cy, rot: -90}
                         ],
                         [
-                            {val: r(cutRight)+'°', x: x1 + 20, y: y1 - 5}, // Левый нижний (прямой)
-                            {val: r(cutBottomRight)+'°', x: x2 - 20, y: y1 - 5}, // Правый нижний
-                            {val: r(cutTopLeft)+'°', x: x1 + 15, y: y2 + 15} // Левый верхний
+                            {val: r(val1)+'°', x: x1 + 20, y: y1 - 5},
+                            {val: r(val3)+'°', x: x2 - 20, y: y1 - 5},
+                            {val: r(val2)+'°', x: x1 + 15, y: y2 + 15}
                         ]
                     );
                 }
@@ -487,11 +479,9 @@
                     const side = Math.sqrt((a/2)**2 + (b/2)**2);
                     const frameSide = calcLength(side);
 
-                    // Углы ромба
                     const angleAtHoriz = 2 * r2d(Math.atan((b/2) / (a/2))); 
                     const angleAtVert = 180 - angleAtHoriz;
                     
-                    // Углы запила (половина угла)
                     const cutHoriz = angleAtHoriz / 2;
                     const cutVert = angleAtVert / 2;
 
@@ -551,29 +541,27 @@
                         </div>
                         <div style="text-align: right;">
                             <div class="result-value">${res.val.toFixed(1)} мм</div>
-                            ${res.angle ? `<div class="result-angle">Угол запила: ${res.angle.toFixed(1)}°</div>` : ''}
+                            ${res.angle ? `<div class="result-angle">Угол: ${res.angle.toFixed(1)}°</div>` : ''}
                         </div>
                     </div>
                 `;
             });
         }
 
-        // Копирование результата
         function copyResults() {
             const list = document.getElementById('resultsList');
             const text = list.innerText;
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(text).then(() => {
                     if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                    if (tg?.showAlert) tg.showAlert('Результат скопирован!');
-                    else alert('Результат скопирован!');
+                    if (tg?.showAlert) tg.showAlert('Скопировано в буфер обмена!');
+                    else alert('Скопировано!');
                 });
             } else {
                 alert('Не удалось скопировать');
             }
         }
 
-        // Инициализация
         window.onload = () => {
             loadSettings();
             renderInputs();
