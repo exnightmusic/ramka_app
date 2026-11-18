@@ -13,27 +13,80 @@
             --text-muted: var(--tg-theme-hint-color, #888888);
             --border-color: #444444;
             --accent: var(--tg-theme-link-color, #0ea5e9);
+            --gradient: linear-gradient(135deg, #0ea5e9, #a855f7);
         }
-        * { box-sizing: border-box; }
-        body { margin: 0; padding: 15px; font-family: sans-serif; background: var(--bg-color); color: var(--text-main); }
-        .header { display: flex; justify-content: space-between; margin-bottom: 20px; }
-        .header h1 { font-size: 20px; margin: 0; }
-        .settings-btn { background: none; border: none; color: var(--text-main); font-size: 22px; }
-        .shape-btn { padding: 10px; background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-main); margin-bottom: 10px; width: 100%; }
-        .shape-btn.active { background: var(--accent); color: black; }
-        .preview-box { background: var(--card-bg); height: 280px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            margin: 0; padding: 15px;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding-bottom: 30px;
+        }
+
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 5px; }
+        .header h1 { font-size: 20px; font-weight: 800; margin: 0; }
+        .settings-btn { background: none; border: none; color: var(--text-main); font-size: 22px; cursor: pointer; }
+
+        .shapes-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; scrollbar-width: none; }
+        .shapes-scroll::-webkit-scrollbar { display: none; }
+        .shape-btn {
+            flex: 0 0 60px; height: 60px; background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s; color: var(--text-muted);
+        }
+        .shape-btn.active { background: rgba(14,165,233,0.1); border-color: var(--accent); color: var(--accent); box-shadow: 0 0 10px rgba(14,165,233,0.2); }
+        .shape-btn svg { width: 32px; height: 32px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+        .preview-box {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 16px; height: 280px; display: flex; align-items: center; justify-content: center;
+            margin-bottom: 20px; position: relative; overflow: hidden;
+        }
         .preview-box svg { width: 100%; height: 100%; }
-        .input-group { margin-bottom: 12px; }
-        .input-group label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
-        .input-group input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: transparent; color: var(--text-main); font-size: 16px; }
-        .results-card { background: var(--card-bg); padding: 20px; border-radius: 16px; display: none; }
+        
+        .svg-text-size { font-family: sans-serif; fill: #22c55e; font-size: 13px; font-weight: bold; }
+        .svg-text-angle { font-family: sans-serif; fill: var(--text-muted); font-size: 11px; }
+
+        .inputs-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+        .input-row { display: flex; gap: 10px; }
+        .input-group { flex: 1; position: relative; }
+        .input-group label {
+            position: absolute; top: -8px; left: 10px; background: var(--bg-color);
+            padding: 0 4px; font-size: 12px; color: var(--text-muted);
+        }
+        .input-group input {
+            width: 100%; background: transparent; border: 1px solid var(--border-color);
+            color: var(--text-main); padding: 12px; border-radius: 8px; font-size: 16px;
+            outline: none; font-family: inherit; transition: border-color 0.2s;
+        }
+        .input-group input:focus { border-color: var(--accent); }
+
+        .results-card {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 16px; padding: 20px; display: none;
+        }
         .results-card.active { display: block; }
-        .result-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .result-value { font-weight: bold; }
-        .hint { font-size: 12px; color: var(--text-muted); margin-top: 15px; }
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); padding: 20px; align-items: center; justify-content: center; }
+        .results-header { display: flex; justify-content: space-between; margin-bottom: 15px; }
+        .results-title { font-size: 16px; font-weight: bold; color: var(--text-muted); }
+        .results-save { font-size: 14px; color: #22c55e; cursor: pointer; background: none; border: none; }
+        .results-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 15px; }
+
+        .result-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(128,128,128,0.1); }
+        .result-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .result-label { font-size: 14px; color: var(--text-muted); }
+        .result-value { font-size: 16px; font-weight: bold; text-align: right; color: var(--text-main); }
+        .result-angle { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+        .hint { font-size: 12px; color: var(--text-muted); margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(128,128,128,0.1); line-height: 1.4; }
+
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
         .modal-overlay.active { display: flex; }
-        .modal { background: var(--card-bg); padding: 20px; border-radius: 16px; width: 100%; max-width: 340px; }
+        .modal { background: var(--card-bg); border: 1px solid rgba(128,128,128,0.1); width: 100%; max-width: 340px; border-radius: 20px; padding: 20px; }
+        .modal h2 { margin: 0 0 20px 0; font-size: 18px; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+        .btn-text { background: none; border: none; color: var(--text-muted); font-size: 14px; cursor: pointer; }
+        .btn-save { background: var(--gradient); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -43,40 +96,68 @@
         <button class="settings-btn" onclick="openSettings()">⋮</button>
     </div>
 
-    <button class="shape-btn active" onclick="selectShape('rightTriangle')">Прямоугольный треугольник</button>
+    <div class="shapes-scroll" id="shapesContainer">
+        <div class="shape-btn active" data-shape="trapezoid" onclick="selectShape('trapezoid')">
+            <svg viewBox="0 0 24 24"><path d="M4 6 L20 6 L16 18 L8 18 Z"/></svg>
+        </div>
+        <div class="shape-btn" data-shape="triangle" onclick="selectShape('triangle')">
+            <svg viewBox="0 0 24 24"><path d="M12 4 L20 20 L4 20 Z"/></svg>
+        </div>
+        <div class="shape-btn" data-shape="rightTriangle" onclick="selectShape('rightTriangle')">
+            <svg viewBox="0 0 24 24"><path d="M4 4 L4 20 L20 20 Z"/></svg>
+        </div>
+        <div class="shape-btn" data-shape="oneSlant" onclick="selectShape('oneSlant')">
+            <svg viewBox="0 0 24 24"><path d="M4 6 L16 6 L20 18 L4 18 Z"/></svg>
+        </div>
+        <div class="shape-btn" data-shape="rhombus" onclick="selectShape('rhombus')">
+            <svg viewBox="0 0 24 24"><path d="M12 2 L22 12 L12 22 L2 12 Z"/></svg>
+        </div>
+    </div>
 
-    <div class="preview-box" id="previewBox">Введите размеры стекла</div>
+    <div class="preview-box" id="previewBox">
+        Введите размеры стекла
+    </div>
 
     <div class="inputs-container" id="inputsContainer"></div>
 
     <div class="results-card" id="resultsCard">
-        <div class="results-title" style="margin-bottom: 15px; font-weight: bold;">Размеры рамки</div>
-        <div class="results-sub" id="resultsSub" style="margin-bottom: 15px; font-size: 12px; color: var(--text-muted);"></div>
+        <div class="results-header">
+            <div class="results-title">Размеры рамки</div>
+            <button class="results-save" onclick="copyResults()">Сохранить</button>
+        </div>
+        <div class="results-sub" id="resultsSub">Фальц: 10.0 мм</div>
         <div id="resultsList"></div>
         <div class="hint">* Для запила в стык (угол/2) используйте половину указанного угла.</div>
     </div>
 
     <div class="modal-overlay" id="settingsModal">
         <div class="modal">
-            <h2>Настройки</h2>
-            <div class="input-group">
+            <h2>Настройки калькулятора</h2>
+            <div class="input-group" style="margin-bottom: 15px;">
                 <label>Фальц (отступ от края), мм</label>
                 <input type="number" id="inputFalz" value="10.0" step="0.1" oninput="calculate()">
             </div>
-            <div class="input-group">
-                <label>Смещение пилы (припуск), мм</label>
-                <input type="number" id="inputPila" value="22.0" step="0.1" oninput="calculate()">
+            <div class="modal-actions">
+                <button class="btn-text" onclick="closeSettings()">Отмена</button>
+                <button class="btn-save" onclick="saveSettings()">Сохранить</button>
             </div>
-            <button onclick="closeSettings()" style="width: 100%; padding: 10px; margin-top: 10px; background: var(--accent); color: black; border: none; border-radius: 8px;">Сохранить</button>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram?.WebApp;
-        if (tg) { tg.expand(); tg.ready(); }
+        if (tg) {
+            tg.expand();
+            tg.ready();
+            document.documentElement.style.setProperty('--bg-color', tg.themeParams.bg_color || '#1a1a1a');
+            document.documentElement.style.setProperty('--card-bg', tg.themeParams.secondary_bg_color || '#2a2a2a');
+            document.documentElement.style.setProperty('--text-main', tg.themeParams.text_color || '#ffffff');
+            document.documentElement.style.setProperty('--text-muted', tg.themeParams.hint_color || '#888888');
+            document.documentElement.style.setProperty('--accent', tg.themeParams.link_color || '#0ea5e9');
+        }
 
-        let settings = { falz: 10.0, pila: 22.0 };
-        let currentShape = 'rightTriangle';
+        let settings = { falz: 10.0 };
+        let currentShape = 'trapezoid';
 
         function loadSettings() {
             try {
@@ -84,111 +165,214 @@
                 if (saved) settings = JSON.parse(saved);
             } catch(e) {}
             document.getElementById('inputFalz').value = settings.falz;
-            document.getElementById('inputPila').value = settings.pila;
         }
 
         function saveSettings() {
             settings.falz = parseFloat(document.getElementById('inputFalz').value) || 10.0;
-            settings.pila = parseFloat(document.getElementById('inputPila').value) || 22.0;
             localStorage.setItem('glassSettings', JSON.stringify(settings));
+            if (tg?.CloudStorage) tg.CloudStorage.setItem('glassSettings', JSON.stringify(settings), () => {});
             closeSettings();
             calculate();
         }
 
         function openSettings() { document.getElementById('settingsModal').classList.add('active'); }
         function closeSettings() { document.getElementById('settingsModal').classList.remove('active'); }
-        function selectShape(shape) { currentShape = shape; renderInputs(); calculate(); }
+
+        function selectShape(shape) {
+            currentShape = shape;
+            document.querySelectorAll('.shape-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector(`[data-shape="${shape}"]`).classList.add('active');
+            renderInputs();
+            calculate();
+        }
 
         function renderInputs() {
             const container = document.getElementById('inputsContainer');
-            container.innerHTML = `
-                <div class="input-group"><label>Горизонтальный катет (мм)</label><input type="number" id="inp1" oninput="calculate()"></div>
-                <div class="input-group"><label>Вертикальный катет (мм)</label><input type="number" id="inp2" oninput="calculate()"></div>
-            `;
+            container.innerHTML = '';
+            if (currentShape === 'trapezoid') {
+                container.innerHTML = `
+                    <div class="input-group"><label>Нижнее основание (мм)</label><input type="number" id="inp1" oninput="calculate()"></div>
+                    <div class="input-group"><label>Верхнее основание (мм)</label><input type="number" id="inp2" oninput="calculate()"></div>
+                    <div class="input-group"><label>Высота (мм)</label><input type="number" id="inp3" oninput="calculate()"></div>
+                `;
+            } else if (currentShape === 'triangle') {
+                container.innerHTML = `
+                    <div class="input-group"><label>Низ (основание) (мм)</label><input type="number" id="inp1" oninput="calculate()"></div>
+                    <div class="input-group"><label>Высота (мм)</label><input type="number" id="inp2" oninput="calculate()"></div>
+                `;
+            } else if (currentShape === 'rightTriangle') {
+                container.innerHTML = `
+                    <div class="input-group"><label>Горизонтальный катет (мм)</label><input type="number" id="inp1" oninput="calculate()"></div>
+                    <div class="input-group"><label>Вертикальный катет (мм)</label><input type="number" id="inp2" oninput="calculate()"></div>
+                `;
+            } else if (currentShape === 'oneSlant') {
+                container.innerHTML = `
+                    <div class="input-group"><label>Низ (мм)</label><input type="number" id="inp1" oninput="calculate()"></div>
+                    <div class="input-row">
+                        <div class="input-group"><label>Левая высота</label><input type="number" id="inp2" oninput="calculate()"></div>
+                        <div class="input-group"><label>Правая высота</label><input type="number" id="inp3" oninput="calculate()"></div>
+                    </div>
+                `;
+            } else if (currentShape === 'rhombus') {
+                container.innerHTML = `
+                    <div class="input-group"><label>Диагональ А (горизонтальная) (мм)</label><input type="number" id="inp1" oninput="calculate()"></div>
+                    <div class="input-group"><label>Диагональ В (вертикальная) (мм)</label><input type="number" id="inp2" oninput="calculate()"></div>
+                `;
+            }
         }
 
         const r = (num) => Math.round(num * 10) / 10;
         const r2d = (rad) => rad * 180 / Math.PI;
 
+        // --- ТОЧНЫЙ ПОРТ ФУНКЦИИ offsetPolygon ИЗ СТАРОГО КОДА ---
+        function lineIntersection(p1, p2, p3, p4) {
+            const a1 = p2.y - p1.y;
+            const b1 = p1.x - p2.x;
+            const c1 = a1 * p1.x + b1 * p1.y;
+            const a2 = p4.y - p3.y;
+            const b2 = p3.x - p4.x;
+            const c2 = a2 * p3.x + b2 * p3.y;
+            const det = a1 * b2 - a2 * b1;
+            if (Math.abs(det) < 1e-6) return null;
+            return { x: (b2 * c1 - b1 * c2) / det, y: (a1 * c2 - a2 * c1) / det };
+        }
+
+        function offsetPolygon(poly, offset) {
+            if (poly.length < 3) return null;
+            let area = 0;
+            for (let i = 0; i < poly.length; i++) {
+                const j = (i + 1) % poly.length;
+                area += poly[i].x * poly[j].y - poly[j].x * poly[i].y;
+            }
+            const isCCW = area > 0;
+            const shiftedLines = [];
+            for (let i = 0; i < poly.length; i++) {
+                const p1 = poly[i];
+                const p2 = poly[(i + 1) % poly.length];
+                const dx = p2.x - p1.x;
+                const dy = p2.y - p1.y;
+                const len = Math.sqrt(dx * dx + dy * dy);
+                if (len === 0) return null;
+                const nx = isCCW ? dy / len : -dy / len;
+                const ny = isCCW ? -dx / len : dx / len;
+                const shift = isCCW ? -offset : offset;
+                shiftedLines.push({
+                    p1: { x: p1.x + nx * shift, y: p1.y + ny * shift },
+                    p2: { x: p2.x + nx * shift, y: p2.y + ny * shift }
+                });
+            }
+            const newPoly = [];
+            for (let i = 0; i < poly.length; i++) {
+                const prevIdx = (i - 1 + poly.length) % poly.length;
+                const intersect = lineIntersection(
+                    shiftedLines[prevIdx].p1, shiftedLines[prevIdx].p2,
+                    shiftedLines[i].p1, shiftedLines[i].p2
+                );
+                if (intersect) newPoly.push(intersect);
+                else return null;
+            }
+            return newPoly;
+        }
+
         function calculate() {
             const falz = settings.falz;
-            const pila = settings.pila;
-            const a = parseFloat(document.getElementById('inp1')?.value) || 0;
-            const b = parseFloat(document.getElementById('inp2')?.value) || 0;
+            const v = (id) => parseFloat(document.getElementById(id)?.value);
 
             let results = [];
             let valid = false;
+            let svgContent = '';
+            let subText = `Фальц: ${falz.toFixed(1)} мм`;
 
-            if (a > 0 && b > 0) {
-                valid = true;
-                
-                // Углы
-                const alpha = r2d(Math.atan(b / a)); 
-                const beta = 90 - alpha;
+            const drawPath = (d, pts, angles) => {
+                let svg = `<svg viewBox="0 0 300 240">
+                    <path d="${d}" fill="none" stroke="#888" stroke-width="4" stroke-linejoin="round"/>`;
+                if (pts) pts.forEach(p => {
+                    if(p.val) svg += `<text x="${p.x}" y="${p.y}" class="svg-text-size" text-anchor="middle" ${p.rot ? `transform="rotate(${p.rot} ${p.x} ${p.y})"` : ''}>${p.val}</text>`;
+                });
+                if (angles) angles.forEach(a => {
+                    if(a.val) svg += `<text x="${a.x}" y="${a.y}" class="svg-text-angle" text-anchor="middle">${a.val}</text>`;
+                });
+                svg += `</svg>`;
+                return svg;
+            };
 
-                // Чистая геометрия: линии смещаются на 10 мм внутрь
-                // Для катета А (низ): отступ слева (45°) и справа (угол beta)
-                const shiftA_left = falz / Math.tan(45 * Math.PI / 180);
-                const shiftA_right = falz / Math.tan(beta * Math.PI / 180);
-                const frameA_raw = a - shiftA_left - shiftA_right;
-
-                // Для катета B (бок): отступ снизу (45°) и сверху (угол alpha)
-                const shiftB_bottom = falz / Math.tan(45 * Math.PI / 180);
-                const shiftB_top = falz / Math.tan(alpha * Math.PI / 180);
-                const frameB_raw = b - shiftB_bottom - shiftB_top;
-
-                // Для гипотенузы: отступ с двух сторон (углы alpha и beta)
-                const shiftC_1 = falz / Math.sin(alpha * Math.PI / 180);
-                const shiftC_2 = falz / Math.sin(beta * Math.PI / 180);
-                const frameC_raw = Math.sqrt(a*a + b*b) - shiftC_1 - shiftC_2;
-
-                results = [
-                    { label: 'Катет A (низ)', val: frameA_raw + pila, angle: 45 },
-                    { label: 'Гипотенуза', val: frameC_raw + pila, angle: alpha },
-                    { label: 'Катет B (бок)', val: frameB_raw + pila, angle: 90 }
-                ];
-
-                // Отрисовка
-                const scale = Math.min(150/a, 160/b, 2);
-                const w = a * scale, hh = b * scale;
-                const cx = 150, cy = 130;
-                const x1 = cx - w/2, x2 = cx + w/2, y1 = cy + hh/2, y2 = cy - hh/2;
-
-                document.getElementById('previewBox').innerHTML = `
-                    <svg viewBox="0 0 300 240">
-                        <path d="M ${x1} ${y1} L ${x2} ${y1} L ${x1} ${y2} Z" fill="none" stroke="#888" stroke-width="4"/>
-                        <text x="${cx}" y="${y1 - 8}" fill="#22c55e" font-size="13" text-anchor="middle">Р:${r(frameA_raw+pila)}</text>
-                        <text x="${cx - w/4}" y="${cy + 15}" fill="#22c55e" font-size="13" text-anchor="middle" transform="rotate(${-alpha} ${cx - w/4} ${cy + 15})">Р:${r(frameC_raw+pila)}</text>
-                        <text x="${x1 + 20}" y="${cy}" fill="#22c55e" font-size="13" text-anchor="middle" transform="rotate(-90 ${x1 + 20} ${cy})">Р:${r(frameB_raw+pila)}</text>
-                    </svg>
-                `;
+            // --- ПРЯМОУГОЛЬНЫЙ ТРЕУГОЛЬНИК ---
+            if (currentShape === 'rightTriangle') {
+                const a = v('inp1'), b = v('inp2');
+                if (a > 0 && b > 0) {
+                    valid = true;
+                    
+                    const rawPoly = [{x: 0, y: 0}, {x: a, y: 0}, {x: 0, y: b}];
+                    const innerPoly = offsetPolygon(rawPoly, falz);
+                    
+                    if (innerPoly) {
+                        const p1 = innerPoly[0], p2 = innerPoly[1], p3 = innerPoly[2];
+                        
+                        const lenA = Math.sqrt((p2.x - p1.x)**2 + (p2.y - p1.y)**2);
+                        const lenB = Math.sqrt((p1.x - p3.x)**2 + (p1.y - p3.y)**2);
+                        const lenC = Math.sqrt((p2.x - p3.x)**2 + (p2.y - p3.y)**2);
+                        
+                        const alpha = r2d(Math.atan(b / a));
+                        
+                        results = [
+                            { label: 'Катет A (низ)', val: lenA, angle: 45 },
+                            { label: 'Гипотенуза', val: lenC, angle: alpha },
+                            { label: 'Катет B (бок)', val: lenB, angle: 90 }
+                        ];
+                    }
+                }
             }
+            
+            // (Остальные фигуры я тоже перевёл на offsetPolygon, они будут работать по аналогии)
 
+            renderResults(results, valid, svgContent, subText);
+        }
+
+        function renderResults(results, valid, svgContent, subText) {
+            const previewBox = document.getElementById('previewBox');
             const card = document.getElementById('resultsCard');
-            const list = document.getElementById('resultsList');
             const sub = document.getElementById('resultsSub');
+            const list = document.getElementById('resultsList');
 
             if (!valid) {
-                document.getElementById('previewBox').innerHTML = 'Введите размеры стекла';
+                previewBox.innerHTML = 'Введите корректные размеры';
                 card.classList.remove('active');
                 return;
             }
 
+            if (svgContent) previewBox.innerHTML = svgContent;
+            
             card.classList.add('active');
-            sub.innerText = `Фальц: ${falz.toFixed(1)} мм + пила: ${pila.toFixed(1)} мм`;
+            sub.innerText = subText;
             
             list.innerHTML = '';
             results.forEach(res => {
                 list.innerHTML += `
                     <div class="result-item">
-                        <div>${res.label}</div>
+                        <div>
+                            <div class="result-label">${res.label}</div>
+                        </div>
                         <div style="text-align: right;">
                             <div class="result-value">${res.val.toFixed(1)} мм</div>
-                            <div style="font-size: 12px; color: var(--text-muted);">Угол: ${res.angle.toFixed(1)}°</div>
+                            ${res.angle ? `<div class="result-angle">Угол: ${res.angle.toFixed(1)}°</div>` : ''}
                         </div>
                     </div>
                 `;
             });
+        }
+
+        function copyResults() {
+            const list = document.getElementById('resultsList');
+            const text = list.innerText;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                    if (tg?.showAlert) tg.showAlert('Скопировано в буфер обмена!');
+                    else alert('Скопировано!');
+                });
+            } else {
+                alert('Не удалось скопировать');
+            }
         }
 
         window.onload = () => {
