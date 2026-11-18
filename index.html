@@ -125,7 +125,7 @@
             <div class="results-title">Размеры рамки</div>
             <button class="results-save" onclick="copyResults()">Сохранить</button>
         </div>
-        <div class="results-sub" id="resultsSub">Фальц 10.0 мм + запил 22.0 мм</div>
+        <div class="results-sub" id="resultsSub">Фальц (отступ от края): 10.0 мм</div>
         <div id="resultsList"></div>
         <div class="hint">* Для запила в стык (угол/2) используйте половину указанного угла.</div>
     </div>
@@ -136,10 +136,6 @@
             <div class="input-group" style="margin-bottom: 15px;">
                 <label>Фальц (отступ от края), мм</label>
                 <input type="number" id="inputFalz" value="10.0" step="0.1" oninput="calculate()">
-            </div>
-            <div class="input-group">
-                <label>Смещение пилы (припуск), мм</label>
-                <input type="number" id="inputPila" value="22.0" step="0.1" oninput="calculate()">
             </div>
             <div class="modal-actions">
                 <button class="btn-text" onclick="closeSettings()">Отмена</button>
@@ -160,7 +156,7 @@
             document.documentElement.style.setProperty('--accent', tg.themeParams.link_color || '#0ea5e9');
         }
 
-        let settings = { falz: 10.0, pila: 22.0 };
+        let settings = { falz: 10.0 };
         let currentShape = 'trapezoid';
 
         function loadSettings() {
@@ -169,12 +165,10 @@
                 if (saved) settings = JSON.parse(saved);
             } catch(e) {}
             document.getElementById('inputFalz').value = settings.falz;
-            document.getElementById('inputPila').value = settings.pila;
         }
 
         function saveSettings() {
             settings.falz = parseFloat(document.getElementById('inputFalz').value) || 10.0;
-            settings.pila = parseFloat(document.getElementById('inputPila').value) || 22.0;
             localStorage.setItem('glassSettings', JSON.stringify(settings));
             if (tg?.CloudStorage) tg.CloudStorage.setItem('glassSettings', JSON.stringify(settings), () => {});
             closeSettings();
@@ -232,13 +226,12 @@
 
         function calculate() {
             const falz = settings.falz;
-            const pila = settings.pila;
             const v = (id) => parseFloat(document.getElementById(id)?.value);
 
             let results = [];
             let valid = false;
             let svgContent = '';
-            let subText = `Фальц ${falz.toFixed(1)} мм + запил ${pila.toFixed(1)} мм`;
+            let subText = `Фальц (отступ): ${falz.toFixed(1)} мм`;
 
             const drawPath = (d, pts, angles) => {
                 let svg = `<svg viewBox="0 0 300 240">
@@ -259,15 +252,13 @@
                 if (b > 0 && t > 0 && h > 0 && t <= b) {
                     valid = true;
                     
-                    // Чистая геометрия рамки (с учетом фальца и острых углов)
-                    // Но для простоты используем старую проверенную формулу
                     const diff = (b - t) / 2;
                     const slant = Math.sqrt(diff*diff + h*h);
                     const angleSlantVert = r2d(Math.atan(diff / h));
-
-                    const frameBottom = (b - 2*falz) + pila;
-                    const frameTop = (t - 2*falz) + pila;
-                    const frameSlant = (slant - 2*falz) + pila;
+                    
+                    const frameBottom = b - 2*falz;
+                    const frameTop = t - 2*falz;
+                    const frameSlant = slant - 2*falz;
 
                     const angleCutSide = (90 - angleSlantVert) / 2;
                     const angleCutBase = 45;
@@ -312,8 +303,8 @@
                     const side = Math.sqrt(half*half + h*h);
                     const angleSlantVert = r2d(Math.atan(half / h));
                     
-                    const frameBottom = (b - 2*falz) + pila;
-                    const frameSide = (side - 2*falz) + pila;
+                    const frameBottom = b - 2*falz;
+                    const frameSide = side - 2*falz;
 
                     const angleCutBase = 45;
                     const angleCutSide = (90 - angleSlantVert) / 2;
@@ -350,9 +341,9 @@
                 if (a > 0 && b > 0) {
                     valid = true;
                     
-                    const frameA = (a - 2*falz) + pila;
-                    const frameB = (b - 2*falz) + pila; 
-                    const frameC = (Math.sqrt(a*a + b*b) - 2*falz) + pila;
+                    const frameA = a - 2*falz;
+                    const frameB = b - 2*falz;
+                    const frameC = Math.sqrt(a*a + b*b) - 2*falz;
 
                     const angleHypHoriz = r2d(Math.atan(b / a)); 
                     const val1 = 45; 
@@ -390,16 +381,55 @@
                 if (b > 0 && leftH > 0 && rightH > 0) {
                     valid = true;
                     
-                    const diff = Math.abs(leftH - rightH);
-                    const top = Math.sqrt(b*b + diff*diff);
-                    const angleSlantHoriz = r2d(Math.atan(diff / b));
+                    // Находим углы наклона
+                    const dx = b;
+                    const dy = leftH - rightH;
+                    const lenTop = Math.sqrt(dx*dx + dy*dy);
+                    const alpha = Math.atan2(dy, dx); // Угол наклона верхней стороны
                     
-                    const frameBottom = (b - 2*falz) + pila;
-                    const frameLeft = (leftH - 2*falz) + pila;
-                    const frameRight = (rightH - 2*falz) + pila;
-                    const frameTop = (top - 2*falz) + pila;
-
-                    const angleCut = angleSlantHoriz / 2;
+                    // Смещение на falz внутрь
+                    const f = falz;
+                    
+                    // Координаты смещенных линий (упрощенно)
+                    const shiftX = f * Math.sin(alpha);
+                    const shiftY = f * Math.cos(alpha);
+                    
+                    // Точки пересечения
+                    // Левая вертикаль: x = 0 + f => x = f
+                    // Правая вертикаль: x = b - f
+                    // Низ: y = 0 + f => y = f
+                    // Верх: y = leftH - ...
+                    
+                    const xLeft = f;
+                    const xRight = b - f;
+                    
+                    const yBottom = f;
+                    const yRightTop = rightH - f; // Сдвиг правой верхней точки
+                    
+                    // Уравнение верхней линии: y = leftH - (leftH - rightH)/b * x
+                    // Смещенная линия: y = leftH - (leftH - rightH)/b * x - f / cos(alpha)
+                    
+                    const cosA = Math.cos(alpha);
+                    const sinA = Math.sin(alpha);
+                    
+                    // Сдвиг верхней линии по Y (так как она наклонная)
+                    const yShift = f / cosA;
+                    
+                    // Находим пересечение левой вертикали со смещенной верхней линией
+                    const yLeftTop = leftH - (leftH - rightH)/b * xLeft - yShift;
+                    
+                    // Находим пересечение правой вертикали со смещенной верхней линией
+                    const yRightTopLine = leftH - (leftH - rightH)/b * xRight - yShift;
+                    
+                    // Длины сторон
+                    const frameBottom = xRight - xLeft;
+                    const frameLeft = yLeftTop - yBottom;
+                    const frameRight = rightH - yBottom - f; // Правая сторона от низа до верха
+                    
+                    // Верхняя наклонная линия
+                    const frameTop = Math.sqrt((xRight - xLeft)**2 + (yRightTopLine - yLeftTop)**2);
+                    
+                    const angleCut = r2d(alpha);
                     const cutStraight = 45;
 
                     results = [
@@ -418,7 +448,7 @@
                     svgContent = drawPath(`M ${x1} ${y1} L ${x2} ${y1} L ${x2} ${y3} L ${x1} ${y2} Z`,
                         [
                             {val: 'Р:' + r(frameBottom), x: cx, y: y1 - 8},
-                            {val: 'Р:' + r(frameTop), x: cx - 20, y: y2 + (y3-y2)/2, rot: -angleSlantHoriz},
+                            {val: 'Р:' + r(frameTop), x: cx - 20, y: y2 + (y3-y2)/2, rot: -angleCut},
                             {val: 'Р:' + r(frameRight), x: x2 - 20, y: cy, rot: 90},
                             {val: 'Р:' + r(frameLeft), x: x1 + 20, y: cy, rot: -90}
                         ],
@@ -437,7 +467,7 @@
                 if (a > 0 && b > 0) {
                     valid = true;
                     
-                    const frameSide = (Math.sqrt((a/2)**2 + (b/2)**2) - 2*falz) + pila;
+                    const frameSide = Math.sqrt((a/2)**2 + (b/2)**2) - 2*falz;
                     const angleAtHoriz = 2 * r2d(Math.atan((b/2) / (a/2))); 
                     const angleAtVert = 180 - angleAtHoriz;
                     
