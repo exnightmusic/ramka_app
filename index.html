@@ -137,6 +137,10 @@
                 <label>Фальц (отступ от края), мм</label>
                 <input type="number" id="inputFalz" value="10.0" step="0.1" oninput="calculate()">
             </div>
+            <div class="input-group">
+                <label>Смещение пилы (припуск), мм</label>
+                <input type="number" id="inputPila" value="22.0" step="0.1" oninput="calculate()">
+            </div>
             <div class="modal-actions">
                 <button class="btn-text" onclick="closeSettings()">Отмена</button>
                 <button class="btn-save" onclick="saveSettings()">Сохранить</button>
@@ -156,7 +160,7 @@
             document.documentElement.style.setProperty('--accent', tg.themeParams.link_color || '#0ea5e9');
         }
 
-        let settings = { falz: 10.0 };
+        let settings = { falz: 10.0, pila: 22.0 };
         let currentShape = 'trapezoid';
 
         function loadSettings() {
@@ -165,10 +169,12 @@
                 if (saved) settings = JSON.parse(saved);
             } catch(e) {}
             document.getElementById('inputFalz').value = settings.falz;
+            document.getElementById('inputPila').value = settings.pila;
         }
 
         function saveSettings() {
             settings.falz = parseFloat(document.getElementById('inputFalz').value) || 10.0;
+            settings.pila = parseFloat(document.getElementById('inputPila').value) || 22.0;
             localStorage.setItem('glassSettings', JSON.stringify(settings));
             if (tg?.CloudStorage) tg.CloudStorage.setItem('glassSettings', JSON.stringify(settings), () => {});
             closeSettings();
@@ -223,15 +229,17 @@
 
         const r = (num) => Math.round(num * 10) / 10;
         const r2d = (rad) => rad * 180 / Math.PI;
+        const cot = (deg) => 1 / Math.tan(deg * Math.PI / 180);
 
         function calculate() {
             const falz = settings.falz;
+            const pila = settings.pila;
             const v = (id) => parseFloat(document.getElementById(id)?.value);
 
             let results = [];
             let valid = false;
             let svgContent = '';
-            let subText = `Фальц (отступ): ${falz.toFixed(1)} мм`;
+            let subText = `Фальц: ${falz.toFixed(1)} мм + пила: ${pila.toFixed(1)} мм`;
 
             const drawPath = (d, pts, angles) => {
                 let svg = `<svg viewBox="0 0 300 240">
@@ -256,18 +264,21 @@
                     const slant = Math.sqrt(diff*diff + h*h);
                     const angleSlantVert = r2d(Math.atan(diff / h));
                     
-                    const frameBottom = b - 2*falz;
-                    const frameTop = t - 2*falz;
-                    const frameSlant = slant - 2*falz;
+                    const angleBottom = 90 + angleSlantVert;
+                    const angleTop = 90 - angleSlantVert;
 
-                    const angleCutSide = (90 - angleSlantVert) / 2;
-                    const angleCutBase = 45;
+                    const frameBottom = b - falz * (cot(45) + cot(angleBottom/2)) + pila;
+                    const frameTop = t - falz * (cot(45) + cot(angleTop/2)) + pila;
+                    const frameSlant = slant - falz * (cot(angleBottom/2) + cot(angleTop/2)) + pila;
+
+                    const cutBottom = (180 - angleBottom) / 2;
+                    const cutTop = (180 - angleTop) / 2;
 
                     results = [
-                        { label: 'Низ', val: frameBottom, angle: angleCutBase },
-                        { label: 'Правая боковая', val: frameSlant, angle: angleCutSide },
-                        { label: 'Верх', val: frameTop, angle: angleCutBase },
-                        { label: 'Левая боковая', val: frameSlant, angle: angleCutSide }
+                        { label: 'Низ', val: frameBottom, angle: cutBottom },
+                        { label: 'Правая боковая', val: frameSlant, angle: cutBottom },
+                        { label: 'Верх', val: frameTop, angle: cutTop },
+                        { label: 'Левая боковая', val: frameSlant, angle: cutBottom }
                     ];
 
                     const scale = Math.min(180/b, 160/h, 2);
@@ -285,10 +296,10 @@
                             {val: 'Р:' + r(frameSlant), x: x2 - 25, y: cy, rot: 90}
                         ],
                         [
-                            {val: r(angleCutBase) + '°', x: x1 + 20, y: y1 - 5},
-                            {val: r(angleCutBase) + '°', x: x2 - 20, y: y1 - 5},
-                            {val: r(angleCutSide) + '°', x: xt1 + 15, y: y2 - 5},
-                            {val: r(angleCutSide) + '°', x: xt2 - 15, y: y2 - 5}
+                            {val: r(cutBottom) + '°', x: x1 + 20, y: y1 - 5},
+                            {val: r(cutBottom) + '°', x: x2 - 20, y: y1 - 5},
+                            {val: r(cutTop) + '°', x: xt1 + 15, y: y2 - 5},
+                            {val: r(cutTop) + '°', x: xt2 - 15, y: y2 - 5}
                         ]
                     );
                 }
@@ -303,17 +314,19 @@
                     const side = Math.sqrt(half*half + h*h);
                     const angleSlantVert = r2d(Math.atan(half / h));
                     
-                    const frameBottom = b - 2*falz;
-                    const frameSide = side - 2*falz;
+                    const angleBottom = 90 + angleSlantVert;
+                    const angleTop = 2 * angleSlantVert;
 
-                    const angleCutBase = 45;
-                    const angleCutSide = (90 - angleSlantVert) / 2;
-                    const angleCutTop = angleSlantVert;
+                    const frameBottom = b - falz * (cot(45) + cot(angleBottom/2)) + pila;
+                    const frameSide = side - falz * (cot(angleBottom/2) + cot(angleTop/2)) + pila;
+                    
+                    const cutBottom = (180 - angleBottom) / 2;
+                    const cutTop = (180 - angleTop) / 2;
 
                     results = [
-                        { label: 'Низ (основание)', val: frameBottom, angle: angleCutBase },
-                        { label: 'Правая сторона', val: frameSide, angle: angleCutSide },
-                        { label: 'Левая сторона', val: frameSide, angle: angleCutSide }
+                        { label: 'Низ (основание)', val: frameBottom, angle: cutBottom },
+                        { label: 'Правая сторона', val: frameSide, angle: cutBottom },
+                        { label: 'Левая сторона', val: frameSide, angle: cutBottom }
                     ];
 
                     const scale = Math.min(180/b, 160/h, 2);
@@ -328,9 +341,9 @@
                             {val: 'Р:' + r(frameSide), x: cx + w/4, y: cy + 10, rot: angleSlantVert}
                         ],
                         [
-                            {val: r(angleCutBase)+'°', x: x1 + 20, y: y1 - 5},
-                            {val: r(angleCutBase)+'°', x: x2 - 20, y: y1 - 5},
-                            {val: r(angleCutTop)+'°', x: cx, y: y2 + 15}
+                            {val: r(cutBottom)+'°', x: x1 + 20, y: y1 - 5},
+                            {val: r(cutBottom)+'°', x: x2 - 20, y: y1 - 5},
+                            {val: r(cutTop)+'°', x: cx, y: y2 + 15}
                         ]
                     );
                 }
@@ -341,19 +354,17 @@
                 if (a > 0 && b > 0) {
                     valid = true;
                     
-                    const frameA = a - 2*falz;
-                    const frameB = b - 2*falz;
-                    const frameC = Math.sqrt(a*a + b*b) - 2*falz;
-
-                    const angleHypHoriz = r2d(Math.atan(b / a)); 
-                    const val1 = 45; 
-                    const val2 = angleHypHoriz; 
-                    const val3 = 90.0; 
+                    const alpha = r2d(Math.atan(b / a)); 
+                    const beta = 90 - alpha;
+                    
+                    const frameA = a - falz * (cot(45) + cot(beta/2)) + pila;
+                    const frameB = b - falz * (cot(45) + cot(alpha/2)) + pila;
+                    const frameC = Math.sqrt(a*a + b*b) - falz * (cot(alpha/2) + cot(beta/2)) + pila;
 
                     results = [
-                        { label: 'Катет A (низ)', val: frameA, angle: val1 },
-                        { label: 'Гипотенуза', val: frameC, angle: val2 },
-                        { label: 'Катет B (бок)', val: frameB, angle: val3 }
+                        { label: 'Катет A (низ)', val: frameA, angle: 45 },
+                        { label: 'Гипотенуза', val: frameC, angle: alpha },
+                        { label: 'Катет B (бок)', val: frameB, angle: 90 }
                     ];
 
                     const scale = Math.min(150/a, 160/b, 2);
@@ -364,13 +375,13 @@
                     svgContent = drawPath(`M ${x1} ${y1} L ${x2} ${y1} L ${x1} ${y2} Z`,
                         [
                             {val: 'Р: ' + r(frameA), x: cx, y: y1 - 8}, 
-                            {val: 'Р: ' + r(frameC), x: cx - w/4, y: cy + 15, rot: -angleHypHoriz}, 
+                            {val: 'Р: ' + r(frameC), x: cx - w/4, y: cy + 15, rot: -alpha}, 
                             {val: 'Р: ' + r(frameB), x: x1 + 20, y: cy, rot: -90} 
                         ],
                         [
-                            {val: r(val1)+'°', x: x1 + 20, y: y1 - 5},
-                            {val: r(val3)+'°', x: x2 - 20, y: y1 - 5},
-                            {val: r(val2)+'°', x: x1 + 15, y: y2 + 15}
+                            {val: '45.0°', x: x1 + 20, y: y1 - 5},
+                            {val: r(90 - (alpha / 2))+'°', x: x2 - 20, y: y1 - 5},
+                            {val: r(alpha)+'°', x: x1 + 15, y: y2 + 15}
                         ]
                     );
                 }
@@ -381,62 +392,26 @@
                 if (b > 0 && leftH > 0 && rightH > 0) {
                     valid = true;
                     
-                    // Находим углы наклона
-                    const dx = b;
-                    const dy = leftH - rightH;
-                    const lenTop = Math.sqrt(dx*dx + dy*dy);
-                    const alpha = Math.atan2(dy, dx); // Угол наклона верхней стороны
+                    const diff = Math.abs(leftH - rightH);
+                    const top = Math.sqrt(b*b + diff*diff);
+                    const angleSlantHoriz = r2d(Math.atan(diff / b));
                     
-                    // Смещение на falz внутрь
-                    const f = falz;
-                    
-                    // Координаты смещенных линий (упрощенно)
-                    const shiftX = f * Math.sin(alpha);
-                    const shiftY = f * Math.cos(alpha);
-                    
-                    // Точки пересечения
-                    // Левая вертикаль: x = 0 + f => x = f
-                    // Правая вертикаль: x = b - f
-                    // Низ: y = 0 + f => y = f
-                    // Верх: y = leftH - ...
-                    
-                    const xLeft = f;
-                    const xRight = b - f;
-                    
-                    const yBottom = f;
-                    const yRightTop = rightH - f; // Сдвиг правой верхней точки
-                    
-                    // Уравнение верхней линии: y = leftH - (leftH - rightH)/b * x
-                    // Смещенная линия: y = leftH - (leftH - rightH)/b * x - f / cos(alpha)
-                    
-                    const cosA = Math.cos(alpha);
-                    const sinA = Math.sin(alpha);
-                    
-                    // Сдвиг верхней линии по Y (так как она наклонная)
-                    const yShift = f / cosA;
-                    
-                    // Находим пересечение левой вертикали со смещенной верхней линией
-                    const yLeftTop = leftH - (leftH - rightH)/b * xLeft - yShift;
-                    
-                    // Находим пересечение правой вертикали со смещенной верхней линией
-                    const yRightTopLine = leftH - (leftH - rightH)/b * xRight - yShift;
-                    
-                    // Длины сторон
-                    const frameBottom = xRight - xLeft;
-                    const frameLeft = yLeftTop - yBottom;
-                    const frameRight = rightH - yBottom - f; // Правая сторона от низа до верха
-                    
-                    // Верхняя наклонная линия
-                    const frameTop = Math.sqrt((xRight - xLeft)**2 + (yRightTopLine - yLeftTop)**2);
-                    
-                    const angleCut = r2d(alpha);
-                    const cutStraight = 45;
+                    const angleBottom = 90 + angleSlantHoriz;
+                    const angleTop = 90 - angleSlantHoriz;
+
+                    const frameBottom = b - falz * (cot(45) + cot(angleBottom/2)) + pila;
+                    const frameLeft = leftH - falz * (cot(angleBottom/2) + cot(45)) + pila;
+                    const frameRight = rightH - falz * (cot(angleTop/2) + cot(45)) + pila;
+                    const frameTop = top - falz * (cot(angleBottom/2) + cot(angleTop/2)) + pila;
+
+                    const cutBottom = (180 - angleBottom) / 2;
+                    const cutTop = (180 - angleTop) / 2;
 
                     results = [
-                        { label: 'Низ', val: frameBottom, angle: cutStraight },
-                        { label: 'Правая', val: frameRight, angle: cutStraight },
-                        { label: 'Верхняя (наклон)', val: frameTop, angle: angleCut },
-                        { label: 'Левая', val: frameLeft, angle: cutStraight }
+                        { label: 'Низ', val: frameBottom, angle: cutBottom },
+                        { label: 'Правая', val: frameRight, angle: 45 },
+                        { label: 'Верхняя (наклон)', val: frameTop, angle: cutTop },
+                        { label: 'Левая', val: frameLeft, angle: 45 }
                     ];
 
                     const scale = Math.min(160/b, 140/Math.max(leftH, rightH), 2);
@@ -448,15 +423,15 @@
                     svgContent = drawPath(`M ${x1} ${y1} L ${x2} ${y1} L ${x2} ${y3} L ${x1} ${y2} Z`,
                         [
                             {val: 'Р:' + r(frameBottom), x: cx, y: y1 - 8},
-                            {val: 'Р:' + r(frameTop), x: cx - 20, y: y2 + (y3-y2)/2, rot: -angleCut},
+                            {val: 'Р:' + r(frameTop), x: cx - 20, y: y2 + (y3-y2)/2, rot: -angleSlantHoriz},
                             {val: 'Р:' + r(frameRight), x: x2 - 20, y: cy, rot: 90},
                             {val: 'Р:' + r(frameLeft), x: x1 + 20, y: cy, rot: -90}
                         ],
                         [
-                            {val: r(cutStraight)+'°', x: x1 + 20, y: y1 - 5},
-                            {val: r(cutStraight)+'°', x: x2 - 20, y: y1 - 5},
-                            {val: r(angleCut)+'°', x: x1 + 15, y: y2 + 15},
-                            {val: r(angleCut)+'°', x: x2 - 15, y: y3 + 15}
+                            {val: r(cutBottom)+'°', x: x1 + 20, y: y1 - 5},
+                            {val: r(cutBottom)+'°', x: x2 - 20, y: y1 - 5},
+                            {val: r(cutTop)+'°', x: x1 + 15, y: y2 + 15},
+                            {val: r(cutTop)+'°', x: x2 - 15, y: y3 + 15}
                         ]
                     );
                 }
@@ -467,12 +442,14 @@
                 if (a > 0 && b > 0) {
                     valid = true;
                     
-                    const frameSide = Math.sqrt((a/2)**2 + (b/2)**2) - 2*falz;
+                    const side = Math.sqrt((a/2)**2 + (b/2)**2);
                     const angleAtHoriz = 2 * r2d(Math.atan((b/2) / (a/2))); 
                     const angleAtVert = 180 - angleAtHoriz;
                     
                     const cutHoriz = angleAtHoriz / 2;
                     const cutVert = angleAtVert / 2;
+                    
+                    const frameSide = side - falz * (cot(cutHoriz) + cot(cutVert)) + pila;
 
                     results = [
                         { label: 'Все стороны (4 шт)', val: frameSide, angle: cutHoriz }
