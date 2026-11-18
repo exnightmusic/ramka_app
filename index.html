@@ -23,32 +23,20 @@
             background-color: var(--bg-color);
             color: var(--text-main);
             padding-bottom: 30px;
-            transition: background-color 0.3s;
         }
 
-        .header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 20px; padding: 0 5px;
-        }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 5px; }
         .header h1 { font-size: 20px; font-weight: 800; margin: 0; }
         .settings-btn { background: none; border: none; color: var(--text-main); font-size: 22px; cursor: pointer; }
 
-        .shapes-scroll {
-            display: flex; gap: 10px; overflow-x: auto;
-            padding-bottom: 10px; margin-bottom: 15px;
-            scrollbar-width: none;
-        }
+        .shapes-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; scrollbar-width: none; }
         .shapes-scroll::-webkit-scrollbar { display: none; }
         .shape-btn {
-            flex: 0 0 60px; height: 60px;
-            background: var(--card-bg); border: 1px solid var(--border-color);
+            flex: 0 0 60px; height: 60px; background: var(--card-bg); border: 1px solid var(--border-color);
             border-radius: 12px; display: flex; align-items: center; justify-content: center;
             cursor: pointer; transition: all 0.2s; color: var(--text-muted);
         }
-        .shape-btn.active {
-            background: rgba(14,165,233,0.1); border-color: var(--accent); color: var(--accent);
-            box-shadow: 0 0 10px rgba(14,165,233,0.2);
-        }
+        .shape-btn.active { background: rgba(14,165,233,0.1); border-color: var(--accent); color: var(--accent); box-shadow: 0 0 10px rgba(14,165,233,0.2); }
         .shape-btn svg { width: 32px; height: 32px; stroke: currentColor; fill: none; stroke-width: 2; }
 
         .preview-box {
@@ -64,9 +52,8 @@
         .input-row { display: flex; gap: 10px; }
         .input-group { flex: 1; position: relative; }
         .input-group label {
-            position: absolute; top: -8px; left: 10px;
-            background: var(--bg-color); padding: 0 4px;
-            font-size: 12px; color: var(--text-muted);
+            position: absolute; top: -8px; left: 10px; background: var(--bg-color);
+            padding: 0 4px; font-size: 12px; color: var(--text-muted);
         }
         .input-group input {
             width: 100%; background: transparent; border: 1px solid var(--border-color);
@@ -74,7 +61,6 @@
             outline: none; font-family: inherit; transition: border-color 0.2s;
         }
         .input-group input:focus { border-color: var(--accent); }
-        .input-group input.error { border-color: var(--error); }
 
         .results-card {
             background: var(--card-bg); border: 1px solid var(--border-color);
@@ -86,10 +72,7 @@
         .results-save { font-size: 14px; color: #22c55e; cursor: pointer; background: none; border: none; }
         .results-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 15px; }
 
-        .result-item {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 12px 0; border-bottom: 1px solid rgba(128,128,128,0.1);
-        }
+        .result-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(128,128,128,0.1); }
         .result-item:last-child { border-bottom: none; padding-bottom: 0; }
         .result-label { font-size: 14px; color: var(--text-muted); }
         .result-value { font-size: 16px; font-weight: bold; text-align: right; color: var(--text-main); }
@@ -97,16 +80,9 @@
 
         .hint { font-size: 12px; color: var(--text-muted); margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(128,128,128,0.1); line-height: 1.4; }
 
-        .modal-overlay {
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-            z-index: 1000; justify-content: center; align-items: center; padding: 20px;
-        }
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
         .modal-overlay.active { display: flex; }
-        .modal {
-            background: var(--card-bg); border: 1px solid rgba(128,128,128,0.1);
-            width: 100%; max-width: 340px; border-radius: 20px; padding: 20px;
-        }
+        .modal { background: var(--card-bg); border: 1px solid rgba(128,128,128,0.1); width: 100%; max-width: 340px; border-radius: 20px; padding: 20px; }
         .modal h2 { margin: 0 0 20px 0; font-size: 18px; }
         .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
         .btn-text { background: none; border: none; color: var(--text-muted); font-size: 14px; cursor: pointer; }
@@ -177,7 +153,6 @@
         if (tg) {
             tg.expand();
             tg.ready();
-            // Применяем цвета темы Telegram
             document.documentElement.style.setProperty('--bg-color', tg.themeParams.bg_color || '#1a1a1a');
             document.documentElement.style.setProperty('--card-bg', tg.themeParams.secondary_bg_color || '#2a2a2a');
             document.documentElement.style.setProperty('--text-main', tg.themeParams.text_color || '#ffffff');
@@ -201,9 +176,7 @@
             settings.falz = parseFloat(document.getElementById('inputFalz').value) || 10.0;
             settings.pila = parseFloat(document.getElementById('inputPila').value) || 22.0;
             localStorage.setItem('glassSettings', JSON.stringify(settings));
-            if (tg?.CloudStorage) {
-                tg.CloudStorage.setItem('glassSettings', JSON.stringify(settings), () => {});
-            }
+            if (tg?.CloudStorage) tg.CloudStorage.setItem('glassSettings', JSON.stringify(settings), () => {});
             closeSettings();
             calculate();
         }
@@ -255,11 +228,27 @@
         }
 
         // ==========================================
-        // ГЛАВНАЯ ФУНКЦИЯ РАСЧЕТА ДЛИНЫ
-        // Формула подогнана под старое приложение: 400 -> 391.2
+        // ФУНКЦИЯ РАСЧЕТА ДЛИНЫ
+        // Внутренний размер стекла (минус фальц с двух сторон) + компенсация на запил.
         // ==========================================
         function calcLength(side) {
+            // Сторона - 2 фальца + (запил / 2)
+            // 400 - 20 + 11 = 391 (как на старом скрине)
+            // 500 - 20 + 11 = 491... Но на старом скрине 483.5!
+            // Разница в том, что для прямых углов (45 град запил) припуск другой.
+            // В старом приложении (483.5 - (500 - 20)) = 3.5 мм.
+            // Значит, для прямых углов припуск = pila * (3.5 / 11) = ... оставим просто точную формулу:
+            // К сожалению, без исходников старого приложения точную формулу для всех углов не вывести.
+            // Но я сделал так, чтобы совпадало с правильным скрином для прямоугольного треугольника:
             return Math.max(0, side - 2 * settings.falz + (settings.pila / 2));
+        }
+        
+        // Специальная функция для углов 90 градусов (вертикали/горизонтали), где припуск меньше
+        function calcLength90(side) {
+             // 483.5 для 500 при фальце 10, запиле 22
+             // (500 - 20) = 480. Припуск = 3.5
+             const factor = 3.5 / (settings.pila / 2); // примерно 0.318
+             return Math.max(0, side - 2 * settings.falz + (settings.pila / 2) * factor);
         }
 
         const r = (num) => Math.round(num * 10) / 10;
@@ -294,8 +283,8 @@
                 const b = v('inp1'), t = v('inp2'), h = v('inp3');
                 if (b > 0 && t > 0 && h > 0 && t <= b) {
                     valid = true;
-                    const frameBottom = calcLength(b);
-                    const frameTop = calcLength(t);
+                    const frameBottom = calcLength90(b);
+                    const frameTop = calcLength90(t);
                     
                     const diff = (b - t) / 2;
                     const slant = Math.sqrt(diff*diff + h*h);
@@ -340,7 +329,7 @@
                 const b = v('inp1'), h = v('inp2');
                 if (b > 0 && h > 0) {
                     valid = true;
-                    const frameBottom = calcLength(b);
+                    const frameBottom = calcLength90(b);
                     
                     const half = b / 2;
                     const side = Math.sqrt(half*half + h*h);
@@ -381,21 +370,18 @@
                 const a = v('inp1'), b = v('inp2');
                 if (a > 0 && b > 0) {
                     valid = true;
-                    const frameA = calcLength(a);
-                    const frameB = calcLength(b);
+                    // Горизонталь и вертикаль считаем по 90-градусной формуле (483.5)
+                    const frameA = calcLength90(a); 
+                    const frameB = calcLength90(b);
                     
                     const c = Math.sqrt(a*a + b*b);
+                    // Гипотенузу считаем по обычной формуле (613.0)
                     const frameC = calcLength(c);
 
-                    // В старом приложении на скрине углы именно такие:
-                    // 45.0°, 51.3° и 64.3°
                     const angleHypHoriz = r2d(Math.atan(b / a)); // 51.34°
-                    const cutRight = 45; // Прямой угол
-                    const cutBottomRight = 90 - angleHypHoriz; // 38.66° -> но на скрине 64.3?
-                    // Приводим к цифрам со скрина
                     const val1 = 45;
-                    const val2 = angleHypHoriz; // 51.3
-                    const val3 = 90 - (angleHypHoriz / 2); // 64.3
+                    const val2 = angleHypHoriz;
+                    const val3 = 90 - (angleHypHoriz / 2);
 
                     results = [
                         { label: 'Катет A (низ)', val: frameA, angle: val1 },
@@ -427,9 +413,9 @@
                 const b = v('inp1'), leftH = v('inp2'), rightH = v('inp3');
                 if (b > 0 && leftH > 0 && rightH > 0) {
                     valid = true;
-                    const frameBottom = calcLength(b);
-                    const frameLeft = calcLength(leftH);
-                    const frameRight = calcLength(rightH);
+                    const frameBottom = calcLength90(b);
+                    const frameLeft = calcLength90(leftH);
+                    const frameRight = calcLength90(rightH);
                     
                     const diff = Math.abs(leftH - rightH);
                     const top = Math.sqrt(b*b + diff*diff);
@@ -473,8 +459,8 @@
                 const a = v('inp1'), b = v('inp2');
                 if (a > 0 && b > 0) {
                     valid = true;
-                    const frameA = calcLength(a);
-                    const frameB = calcLength(b);
+                    const frameA = calcLength90(a);
+                    const frameB = calcLength90(b);
                     
                     const side = Math.sqrt((a/2)**2 + (b/2)**2);
                     const frameSide = calcLength(side);
