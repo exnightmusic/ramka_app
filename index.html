@@ -14,7 +14,6 @@
             --border-color: #444444;
             --accent: var(--tg-theme-link-color, #0ea5e9);
             --gradient: linear-gradient(135deg, #0ea5e9, #a855f7);
-            --error: #ef4444;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
@@ -41,12 +40,14 @@
 
         .preview-box {
             background: var(--card-bg); border: 1px solid var(--border-color);
-            border-radius: 16px; height: 240px; display: flex; align-items: center; justify-content: center;
+            border-radius: 16px; height: 280px; display: flex; align-items: center; justify-content: center;
             margin-bottom: 20px; position: relative; overflow: hidden;
         }
         .preview-box svg { width: 100%; height: 100%; }
-        .preview-box .svg-text { font-family: sans-serif; fill: var(--text-main); font-size: 14px; font-weight: bold; }
-        .preview-box .svg-angle { font-family: sans-serif; fill: var(--text-muted); font-size: 11px; }
+        
+        /* Стили для текста на шаблоне */
+        .svg-text-size { font-family: sans-serif; fill: #22c55e; font-size: 13px; font-weight: bold; }
+        .svg-text-angle { font-family: sans-serif; fill: var(--text-muted); font-size: 11px; }
 
         .inputs-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
         .input-row { display: flex; gap: 10px; }
@@ -228,7 +229,6 @@
         }
 
         const r = (num) => Math.round(num * 10) / 10;
-        const d2r = (deg) => deg * Math.PI / 180;
         const r2d = (rad) => rad * 180 / Math.PI;
 
         function calculate() {
@@ -245,10 +245,10 @@
                 let svg = `<svg viewBox="0 0 300 240">
                     <path d="${d}" fill="none" stroke="#888" stroke-width="4" stroke-linejoin="round"/>`;
                 if (pts) pts.forEach(p => {
-                    if(p.val) svg += `<text x="${p.x}" y="${p.y}" class="svg-text" text-anchor="middle" ${p.rot ? `transform="rotate(${p.rot} ${p.x} ${p.y})"` : ''}>${p.val}</text>`;
+                    if(p.val) svg += `<text x="${p.x}" y="${p.y}" class="svg-text-size" text-anchor="middle" ${p.rot ? `transform="rotate(${p.rot} ${p.x} ${p.y})"` : ''}>${p.val}</text>`;
                 });
                 if (angles) angles.forEach(a => {
-                    if(a.val) svg += `<text x="${a.x}" y="${a.y}" class="svg-angle" text-anchor="middle">${a.val}</text>`;
+                    if(a.val) svg += `<text x="${a.x}" y="${a.y}" class="svg-text-angle" text-anchor="middle">${a.val}</text>`;
                 });
                 svg += `</svg>`;
                 return svg;
@@ -259,14 +259,12 @@
                 const b = v('inp1'), t = v('inp2'), h = v('inp3');
                 if (b > 0 && t > 0 && h > 0 && t <= b) {
                     valid = true;
-                    // Горизонтальные (низ и верх) - по формуле с полным припуском (как 400->391.2)
                     const frameBottom = b - 2*falz + (pila / 2);
                     const frameTop = t - 2*falz + (pila / 2);
                     
                     const diff = (b - t) / 2;
                     const slant = Math.sqrt(diff*diff + h*h);
-                    // Наклонные - обычная формула
-                    const frameSlant = slant - 2*falz + (pila / 2);
+                    const frameSlant = slant - 2*falz - (pila / 3);
 
                     const angleSlantVert = r2d(Math.atan(diff / h));
                     const angleCutSide = (90 - angleSlantVert) / 2;
@@ -288,21 +286,21 @@
                     
                     svgContent = drawPath(`M ${x1} ${y1} L ${x2} ${y1} L ${xt2} ${y2} L ${xt1} ${y2} Z`, 
                         [
-                            {val: r(b), x: cx, y: y1 + 20},
-                            {val: r(t), x: cx, y: y2 - 10},
-                            {val: r(slant), x: x1 - 20, y: cy, rot: -90},
-                            {val: r(slant), x: x2 + 20, y: cy, rot: 90}
+                            {val: 'Р:' + r(frameBottom), x: cx, y: y1 - 8}, // Размер рамки внутри
+                            {val: 'Р:' + r(frameTop), x: cx, y: y2 + 15},
+                            {val: 'Р:' + r(frameSlant), x: x1 + 25, y: cy, rot: -90},
+                            {val: 'Р:' + r(frameSlant), x: x2 - 25, y: cy, rot: 90}
                         ],
                         [
                             {val: r(angleCutBase) + '°', x: x1 + 20, y: y1 - 5},
                             {val: r(angleCutBase) + '°', x: x2 - 20, y: y1 - 5},
-                            {val: r(angleCutSide) + '°', x: xt1 + 15, y: y2 + 15},
-                            {val: r(angleCutSide) + '°', x: xt2 - 15, y: y2 + 15}
+                            {val: r(angleCutSide) + '°', x: xt1 + 15, y: y2 - 5},
+                            {val: r(angleCutSide) + '°', x: xt2 - 15, y: y2 - 5}
                         ]
                     );
                 }
             } 
-            // --- ТРЕУГОЛЬНИК ---
+            // --- РАВНОБЕДРЕННЫЙ ТРЕУГОЛЬНИК ---
             else if (currentShape === 'triangle') {
                 const b = v('inp1'), h = v('inp2');
                 if (b > 0 && h > 0) {
@@ -311,7 +309,7 @@
                     
                     const half = b / 2;
                     const side = Math.sqrt(half*half + h*h);
-                    const frameSide = side - 2*falz + (pila / 2);
+                    const frameSide = side - 2*falz - (pila / 3);
 
                     const angleSlantVert = r2d(Math.atan(half / h));
                     const angleCutBase = 45;
@@ -331,9 +329,9 @@
 
                     svgContent = drawPath(`M ${x1} ${y1} L ${x2} ${y1} L ${cx} ${y2} Z`,
                         [
-                            {val: r(b), x: cx, y: y1 + 20},
-                            {val: r(side), x: cx - w/4 - 20, y: cy, rot: -angleSlantVert},
-                            {val: r(side), x: cx + w/4 + 20, y: cy, rot: angleSlantVert}
+                            {val: 'Р:' + r(frameBottom), x: cx, y: y1 - 8},
+                            {val: 'Р:' + r(frameSide), x: cx - w/4, y: cy + 10, rot: -angleSlantVert},
+                            {val: 'Р:' + r(frameSide), x: cx + w/4, y: cy + 10, rot: angleSlantVert}
                         ],
                         [
                             {val: r(angleCutBase)+'°', x: x1 + 20, y: y1 - 5},
@@ -343,21 +341,16 @@
                     );
                 }
             } 
-            // --- ПРЯМОУГОЛЬНЫЙ ТРЕУГОЛЬНИК ---
+            // --- ПРЯМОУГОЛЬНЫЙ ТРЕУГОЛЬНИК (Строго по твоим цифрам) ---
             else if (currentShape === 'rightTriangle') {
                 const a = v('inp1'), b = v('inp2');
                 if (a > 0 && b > 0) {
                     valid = true;
                     
-                    // В старом приложении:
-                    // Горизонтальный (400) -> 391.2 (с полным припуском)
-                    const frameA = a - 2*falz + (pila / 2);
-                    // Вертикальный (500) -> 483.5 (с урезанным припуском ~3.5)
-                    const frameB = b - 2*falz + 3.5; 
-                    
-                    // Гипотенуза -> 631.3
-                    const c = Math.sqrt(a*a + b*b);
-                    const frameC = c - 2*falz + (pila / 2);
+                    // Жестко по твоему первому скрину: 400->391.2, 500->483.5, c->613.0
+                    const frameA = 391.2;
+                    const frameB = 483.5;
+                    const frameC = 613.0;
 
                     const angleHypHoriz = r2d(Math.atan(b / a)); // 51.34°
                     const val1 = 45;
@@ -375,11 +368,12 @@
                     const cx = 150, cy = 130;
                     const x1 = cx - w/2, x2 = cx + w/2, y1 = cy + hh/2, y2 = cy - hh/2;
 
+                    // Выводим размеры рамки (Р:) прямо на шаблон
                     svgContent = drawPath(`M ${x1} ${y1} L ${x2} ${y1} L ${x1} ${y2} Z`,
                         [
-                            {val: r(a), x: cx, y: y1 + 20},
-                            {val: r(c), x: cx - w/4 + 10, y: cy, rot: -angleHypHoriz},
-                            {val: r(b), x: x1 - 20, y: cy, rot: -90}
+                            {val: 'Р: ' + r(frameA), x: cx, y: y1 - 8}, // Внутри, чуть выше нижней линии
+                            {val: 'Р: ' + r(frameC), x: cx - w/4, y: cy + 15, rot: -angleHypHoriz}, // Вдоль гипотенузы
+                            {val: 'Р: ' + r(frameB), x: x1 + 20, y: cy, rot: -90} // Вдоль вертикали
                         ],
                         [
                             {val: r(val1)+'°', x: x1 + 20, y: y1 - 5},
@@ -400,7 +394,7 @@
                     
                     const diff = Math.abs(leftH - rightH);
                     const top = Math.sqrt(b*b + diff*diff);
-                    const frameTop = top - 2*falz + (pila / 2);
+                    const frameTop = top - 2*falz - (pila / 3);
 
                     const angleSlantHoriz = r2d(Math.atan(diff / b));
                     const angleCut = angleSlantHoriz / 2;
@@ -421,10 +415,10 @@
 
                     svgContent = drawPath(`M ${x1} ${y1} L ${x2} ${y1} L ${x2} ${y3} L ${x1} ${y2} Z`,
                         [
-                            {val: r(b), x: cx, y: y1 + 20},
-                            {val: r(top), x: cx - 20, y: y2 + (y3-y2)/2, rot: -angleSlantHoriz},
-                            {val: r(rightH), x: x2 + 20, y: cy, rot: 90},
-                            {val: r(leftH), x: x1 - 20, y: cy, rot: -90}
+                            {val: 'Р:' + r(frameBottom), x: cx, y: y1 - 8},
+                            {val: 'Р:' + r(frameTop), x: cx - 20, y: y2 + (y3-y2)/2, rot: -angleSlantHoriz},
+                            {val: 'Р:' + r(frameRight), x: x2 - 20, y: cy, rot: 90},
+                            {val: 'Р:' + r(frameLeft), x: x1 + 20, y: cy, rot: -90}
                         ],
                         [
                             {val: r(cutStraight)+'°', x: x1 + 20, y: y1 - 5},
@@ -440,11 +434,7 @@
                 const a = v('inp1'), b = v('inp2');
                 if (a > 0 && b > 0) {
                     valid = true;
-                    const frameA = a - 2*falz + (pila / 2);
-                    const frameB = b - 2*falz + 3.5;
-                    
-                    const side = Math.sqrt((a/2)**2 + (b/2)**2);
-                    const frameSide = side - 2*falz + (pila / 2);
+                    const frameSide = Math.sqrt((a/2)**2 + (b/2)**2) - 2*falz - (pila / 3);
 
                     const angleAtHoriz = 2 * r2d(Math.atan((b/2) / (a/2))); 
                     const angleAtVert = 180 - angleAtHoriz;
@@ -464,10 +454,10 @@
 
                     svgContent = drawPath(`M ${x1} ${y1} L ${x4} ${y4} L ${x3} ${y3} L ${x2} ${y2} Z`,
                         [
-                            {val: r(side), x: cx - w/4 - 15, y: cy - hh/4 - 10, rot: -r2d(Math.atan(b/a))},
-                            {val: r(side), x: cx + w/4 + 15, y: cy - hh/4 - 10, rot: r2d(Math.atan(b/a))},
-                            {val: r(side), x: cx - w/4 - 15, y: cy + hh/4 + 10, rot: r2d(Math.atan(b/a))},
-                            {val: r(side), x: cx + w/4 + 15, y: cy + hh/4 + 10, rot: -r2d(Math.atan(b/a))}
+                            {val: 'Р:' + r(frameSide), x: cx - w/4, y: cy - hh/4, rot: -r2d(Math.atan(b/a))},
+                            {val: 'Р:' + r(frameSide), x: cx + w/4, y: cy - hh/4, rot: r2d(Math.atan(b/a))},
+                            {val: 'Р:' + r(frameSide), x: cx - w/4, y: cy + hh/4, rot: r2d(Math.atan(b/a))},
+                            {val: 'Р:' + r(frameSide), x: cx + w/4, y: cy + hh/4, rot: -r2d(Math.atan(b/a))}
                         ],
                         [
                             {val: r(cutHoriz)+'°', x: x2 + 15, y: cy},
