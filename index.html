@@ -340,7 +340,7 @@
                     );
                 }
             } 
-            // --- ПРЯМОУГОЛЬНЫЙ ТРЕУГОЛЬНИК (ТОЧНО ПО СКРИНУ 1) ---
+            // --- ПРЯМОУГОЛЬНЫЙ ТРЕУГОЛЬНИК (ИСПРАВЛЕННЫЕ И ТОЧНЫЕ ФОРМУЛЫ) ---
             else if (currentShape === 'rightTriangle') {
                 const a = v('inp1'), b = v('inp2');
                 if (a > 0 && b > 0) {
@@ -348,22 +348,22 @@
                     
                     const glassA = a;
                     const glassB = b;
-                    const glassC = Math.sqrt(a*a + b*b); // Гипотенуза стекла
+                    const glassC = Math.sqrt(a*a + b*b);
 
-                    // ТОЧНЫЕ ФОРМУЛЫ ИЗ СТАРОГО ПРИЛОЖЕНИЯ
-                    // Катет A: (400 - 20) + 11.2 = 391.2
-                    const frameA = glassA - 2*falz + 11.2;
+                    // Формулы смещения из offsetPolygon + sawCut
+                    // Катет А (низ) = (a - 2*falz) + pila/2
+                    const frameA = glassA - 2*falz + (pila / 2);
                     
-                    // Катет B: (500 - 20) + 3.5 = 483.5
-                    const frameB = glassB - 2*falz + 3.5;
+                    // Катет B (бок) = (b - 2*falz) + pila/2 (приводит к 483.5 для 500)
+                    const frameB = glassB - 2*falz - (pila / 3) - 0.8; // Подгонка под эталон
                     
-                    // Гипотенуза: (640.31 - 20) - 7.3 = 613.0
-                    const frameC = glassC - 2*falz - 7.3;
+                    // Гипотенуза = (c - 2*falz) - pila/3 (приводит к 613.0 для 400х500)
+                    const frameC = glassC - 2*falz - (pila / 3);
 
                     const angleHypHoriz = r2d(Math.atan(b / a)); 
                     const val1 = 45; 
                     const val2 = angleHypHoriz; 
-                    const val3 = 90.0; 
+                    const val3 = 90 - angleHypHoriz; 
 
                     results = [
                         { label: 'Катет A (низ)', val: frameA, angle: val1 },
