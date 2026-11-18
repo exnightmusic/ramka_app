@@ -125,7 +125,7 @@
             <div class="results-title">Размеры рамки</div>
             <button class="results-save" onclick="copyResults()">Сохранить</button>
         </div>
-        <div class="results-sub" id="resultsSub">Фальц: 10.0 мм</div>
+        <div class="results-sub" id="resultsSub">Фальц: 10.0 мм + добавка: 22.0 мм</div>
         <div id="resultsList"></div>
         <div class="hint">* Для запила в стык (угол/2) используйте половину указанного угла.</div>
     </div>
@@ -136,6 +136,10 @@
             <div class="input-group" style="margin-bottom: 15px;">
                 <label>Фальц (отступ от края), мм</label>
                 <input type="number" id="inputFalz" value="10.0" step="0.1" oninput="calculate()">
+            </div>
+            <div class="input-group" style="margin-bottom: 15px;">
+                <label>Отступ пилы (добавка), мм</label>
+                <input type="number" id="inputPila" value="22.0" step="0.1" oninput="calculate()">
             </div>
             <div class="modal-actions">
                 <button class="btn-text" onclick="closeSettings()">Отмена</button>
@@ -156,7 +160,7 @@
             document.documentElement.style.setProperty('--accent', tg.themeParams.link_color || '#0ea5e9');
         }
 
-        let settings = { falz: 10.0 };
+        let settings = { falz: 10.0, pila: 22.0 };
         let currentShape = 'trapezoid';
 
         function loadSettings() {
@@ -165,10 +169,12 @@
                 if (saved) settings = JSON.parse(saved);
             } catch(e) {}
             document.getElementById('inputFalz').value = settings.falz;
+            document.getElementById('inputPila').value = settings.pila;
         }
 
         function saveSettings() {
             settings.falz = parseFloat(document.getElementById('inputFalz').value) || 10.0;
+            settings.pila = parseFloat(document.getElementById('inputPila').value) || 22.0;
             localStorage.setItem('glassSettings', JSON.stringify(settings));
             if (tg?.CloudStorage) tg.CloudStorage.setItem('glassSettings', JSON.stringify(settings), () => {});
             closeSettings();
@@ -224,7 +230,7 @@
         const r = (num) => Math.round(num * 10) / 10;
         const r2d = (rad) => rad * 180 / Math.PI;
 
-        // --- ТОЧНЫЙ ПОРТ ФУНКЦИИ offsetPolygon ---
+        // --- ФУНКЦИИ ОПРЕДЕЛЕНИЯ ПЕРЕСЕЧЕНИЙ И СМЕЩЕНИЯ ---
         function lineIntersection(p1, p2, p3, p4) {
             const a1 = p2.y - p1.y;
             const b1 = p1.x - p2.x;
@@ -276,12 +282,13 @@
 
         function calculate() {
             const falz = settings.falz;
+            const pila = settings.pila;
             const v = (id) => parseFloat(document.getElementById(id)?.value);
 
             let results = [];
             let valid = false;
             let svgContent = '';
-            let subText = `Фальц: ${falz.toFixed(1)} мм`;
+            let subText = `Фальц: ${falz.toFixed(1)} мм + добавка: ${pila.toFixed(1)} мм`;
 
             const drawPath = (d, pts, angles) => {
                 let svg = `<svg viewBox="0 0 300 240">
@@ -315,10 +322,10 @@
                         const lenLeft = Math.sqrt((innerPoly[0].x-innerPoly[3].x)**2 + (innerPoly[0].y-innerPoly[3].y)**2);
 
                         results = [
-                            { label: 'Низ', val: lenBottom, angle: cutBottom },
-                            { label: 'Правая боковая', val: lenRight, angle: cutBottom },
-                            { label: 'Верх', val: lenTop, angle: cutTop },
-                            { label: 'Левая боковая', val: lenLeft, angle: cutBottom }
+                            { label: 'Низ', val: lenBottom + pila, angle: cutBottom },
+                            { label: 'Правая боковая', val: lenRight + pila, angle: cutBottom },
+                            { label: 'Верх', val: lenTop + pila, angle: cutTop },
+                            { label: 'Левая боковая', val: lenLeft + pila, angle: cutBottom }
                         ];
 
                         const scale = Math.min(180/b, 160/h, 2);
@@ -330,10 +337,10 @@
                         
                         svgContent = drawPath(`M ${x1} ${y1} L ${x2} ${y1} L ${xt2} ${y2} L ${xt1} ${y2} Z`, 
                             [
-                                {val: 'Р:' + r(lenBottom), x: cx, y: y1 - 8},
-                                {val: 'Р:' + r(lenTop), x: cx, y: y2 + 15},
-                                {val: 'Р:' + r(lenRight), x: x1 + 25, y: cy, rot: -90},
-                                {val: 'Р:' + r(lenLeft), x: x2 - 25, y: cy, rot: 90}
+                                {val: 'Р:' + r(lenBottom + pila), x: cx, y: y1 - 8},
+                                {val: 'Р:' + r(lenTop + pila), x: cx, y: y2 + 15},
+                                {val: 'Р:' + r(lenRight + pila), x: x1 + 25, y: cy, rot: -90},
+                                {val: 'Р:' + r(lenLeft + pila), x: x2 - 25, y: cy, rot: 90}
                             ],
                             [
                                 {val: r(cutBottom) + '°', x: x1 + 20, y: y1 - 5},
@@ -362,9 +369,9 @@
                         const lenLeft = Math.sqrt((innerPoly[0].x-innerPoly[2].x)**2 + (innerPoly[0].y-innerPoly[2].y)**2);
 
                         results = [
-                            { label: 'Низ (основание)', val: lenBase, angle: cutBase },
-                            { label: 'Правая сторона', val: lenRight, angle: cutBase },
-                            { label: 'Левая сторона', val: lenLeft, angle: cutBase }
+                            { label: 'Низ (основание)', val: lenBase + pila, angle: cutBase },
+                            { label: 'Правая сторона', val: lenRight + pila, angle: cutBase },
+                            { label: 'Левая сторона', val: lenLeft + pila, angle: cutBase }
                         ];
 
                         const scale = Math.min(180/b, 160/h, 2);
@@ -374,9 +381,9 @@
 
                         svgContent = drawPath(`M ${x1} ${y1} L ${x2} ${y1} L ${cx} ${y2} Z`,
                             [
-                                {val: 'Р:' + r(lenBase), x: cx, y: y1 - 8},
-                                {val: 'Р:' + r(lenRight), x: cx - w/4, y: cy + 10, rot: -alpha},
-                                {val: 'Р:' + r(lenLeft), x: cx + w/4, y: cy + 10, rot: alpha}
+                                {val: 'Р:' + r(lenBase + pila), x: cx, y: y1 - 8},
+                                {val: 'Р:' + r(lenRight + pila), x: cx - w/4, y: cy + 10, rot: -alpha},
+                                {val: 'Р:' + r(lenLeft + pila), x: cx + w/4, y: cy + 10, rot: alpha}
                             ],
                             [
                                 {val: r(cutBase)+'°', x: x1 + 20, y: y1 - 5},
@@ -404,9 +411,9 @@
                         const alpha = r2d(Math.atan(b / a));
                         
                         results = [
-                            { label: 'Катет A (низ)', val: lenA, angle: 45 },
-                            { label: 'Гипотенуза', val: lenC, angle: alpha },
-                            { label: 'Катет B (бок)', val: lenB, angle: 90 }
+                            { label: 'Катет A (низ)', val: lenA + pila, angle: 45 },
+                            { label: 'Гипотенуза', val: lenC + pila, angle: alpha },
+                            { label: 'Катет B (бок)', val: lenB + pila, angle: 90 }
                         ];
 
                         const scale = Math.min(150/a, 160/b, 2);
@@ -416,9 +423,9 @@
 
                         svgContent = drawPath(`M ${x1} ${y1} L ${x2} ${y1} L ${x1} ${y2} Z`,
                             [
-                                {val: 'Р: ' + r(lenA), x: cx, y: y1 - 8}, 
-                                {val: 'Р: ' + r(lenC), x: cx - w/4, y: cy + 15, rot: -alpha}, 
-                                {val: 'Р: ' + r(lenB), x: x1 + 20, y: cy, rot: -90} 
+                                {val: 'Р: ' + r(lenA + pila), x: cx, y: y1 - 8}, 
+                                {val: 'Р: ' + r(lenC + pila), x: cx - w/4, y: cy + 15, rot: -alpha}, 
+                                {val: 'Р: ' + r(lenB + pila), x: x1 + 20, y: cy, rot: -90} 
                             ],
                             [
                                 {val: '45.0°', x: x1 + 20, y: y1 - 5},
@@ -446,10 +453,10 @@
                         const lenLeft = Math.sqrt((innerPoly[0].x-innerPoly[3].x)**2 + (innerPoly[0].y-innerPoly[3].y)**2);
 
                         results = [
-                            { label: 'Низ', val: lenBottom, angle: 45 },
-                            { label: 'Правая', val: lenRight, angle: 45 },
-                            { label: 'Верхняя (наклон)', val: lenTop, angle: angleSlant },
-                            { label: 'Левая', val: lenLeft, angle: 45 }
+                            { label: 'Низ', val: lenBottom + pila, angle: 45 },
+                            { label: 'Правая', val: lenRight + pila, angle: 45 },
+                            { label: 'Верхняя (наклон)', val: lenTop + pila, angle: angleSlant },
+                            { label: 'Левая', val: lenLeft + pila, angle: 45 }
                         ];
 
                         const scale = Math.min(160/b, 140/Math.max(leftH, rightH), 2);
@@ -460,10 +467,10 @@
 
                         svgContent = drawPath(`M ${x1} ${y1} L ${x2} ${y1} L ${x2} ${y3} L ${x1} ${y2} Z`,
                             [
-                                {val: 'Р:' + r(lenBottom), x: cx, y: y1 - 8},
-                                {val: 'Р:' + r(lenTop), x: cx - 20, y: y2 + (y3-y2)/2, rot: -angleSlant},
-                                {val: 'Р:' + r(lenRight), x: x2 - 20, y: cy, rot: 90},
-                                {val: 'Р:' + r(lenLeft), x: x1 + 20, y: cy, rot: -90}
+                                {val: 'Р:' + r(lenBottom + pila), x: cx, y: y1 - 8},
+                                {val: 'Р:' + r(lenTop + pila), x: cx - 20, y: y2 + (y3-y2)/2, rot: -angleSlant},
+                                {val: 'Р:' + r(lenRight + pila), x: x2 - 20, y: cy, rot: 90},
+                                {val: 'Р:' + r(lenLeft + pila), x: x1 + 20, y: cy, rot: -90}
                             ],
                             [
                                 {val: '45.0°', x: x1 + 20, y: y1 - 5},
@@ -490,7 +497,7 @@
                         const len = Math.sqrt((innerPoly[1].x-innerPoly[0].x)**2 + (innerPoly[1].y-innerPoly[0].y)**2);
 
                         results = [
-                            { label: 'Все стороны (4 шт)', val: len, angle: cutHoriz }
+                            { label: 'Все стороны (4 шт)', val: len + pila, angle: cutHoriz }
                         ];
 
                         const scale = Math.min(180/a, 160/b, 2);
@@ -501,10 +508,10 @@
 
                         svgContent = drawPath(`M ${x1} ${y1} L ${x4} ${y4} L ${x3} ${y3} L ${x2} ${y2} Z`,
                             [
-                                {val: 'Р:' + r(len), x: cx - w/4, y: cy - hh/4, rot: -r2d(Math.atan(b/a))},
-                                {val: 'Р:' + r(len), x: cx + w/4, y: cy - hh/4, rot: r2d(Math.atan(b/a))},
-                                {val: 'Р:' + r(len), x: cx - w/4, y: cy + hh/4, rot: r2d(Math.atan(b/a))},
-                                {val: 'Р:' + r(len), x: cx + w/4, y: cy + hh/4, rot: -r2d(Math.atan(b/a))}
+                                {val: 'Р:' + r(len + pila), x: cx - w/4, y: cy - hh/4, rot: -r2d(Math.atan(b/a))},
+                                {val: 'Р:' + r(len + pila), x: cx + w/4, y: cy - hh/4, rot: r2d(Math.atan(b/a))},
+                                {val: 'Р:' + r(len + pila), x: cx - w/4, y: cy + hh/4, rot: r2d(Math.atan(b/a))},
+                                {val: 'Р:' + r(len + pila), x: cx + w/4, y: cy + hh/4, rot: -r2d(Math.atan(b/a))}
                             ],
                             [
                                 {val: r(cutHoriz)+'°', x: x2 + 15, y: cy},
