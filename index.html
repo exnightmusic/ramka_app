@@ -13,80 +13,27 @@
             --text-muted: var(--tg-theme-hint-color, #888888);
             --border-color: #444444;
             --accent: var(--tg-theme-link-color, #0ea5e9);
-            --gradient: linear-gradient(135deg, #0ea5e9, #a855f7);
         }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body {
-            margin: 0; padding: 15px;
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            padding-bottom: 30px;
-        }
-
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 5px; }
-        .header h1 { font-size: 20px; font-weight: 800; margin: 0; }
-        .settings-btn { background: none; border: none; color: var(--text-main); font-size: 22px; cursor: pointer; }
-
-        .shapes-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; scrollbar-width: none; }
-        .shapes-scroll::-webkit-scrollbar { display: none; }
-        .shape-btn {
-            flex: 0 0 60px; height: 60px; background: var(--card-bg); border: 1px solid var(--border-color);
-            border-radius: 12px; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: all 0.2s; color: var(--text-muted);
-        }
-        .shape-btn.active { background: rgba(14,165,233,0.1); border-color: var(--accent); color: var(--accent); box-shadow: 0 0 10px rgba(14,165,233,0.2); }
-        .shape-btn svg { width: 32px; height: 32px; stroke: currentColor; fill: none; stroke-width: 2; }
-
-        .preview-box {
-            background: var(--card-bg); border: 1px solid var(--border-color);
-            border-radius: 16px; height: 280px; display: flex; align-items: center; justify-content: center;
-            margin-bottom: 20px; position: relative; overflow: hidden;
-        }
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 15px; font-family: sans-serif; background: var(--bg-color); color: var(--text-main); }
+        .header { display: flex; justify-content: space-between; margin-bottom: 20px; }
+        .header h1 { font-size: 20px; margin: 0; }
+        .settings-btn { background: none; border: none; color: var(--text-main); font-size: 22px; }
+        .shape-btn { padding: 10px; background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-main); margin-bottom: 10px; width: 100%; }
+        .shape-btn.active { background: var(--accent); color: black; }
+        .preview-box { background: var(--card-bg); height: 280px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
         .preview-box svg { width: 100%; height: 100%; }
-        
-        .svg-text-size { font-family: sans-serif; fill: #22c55e; font-size: 13px; font-weight: bold; }
-        .svg-text-angle { font-family: sans-serif; fill: var(--text-muted); font-size: 11px; }
-
-        .inputs-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-        .input-row { display: flex; gap: 10px; }
-        .input-group { flex: 1; position: relative; }
-        .input-group label {
-            position: absolute; top: -8px; left: 10px; background: var(--bg-color);
-            padding: 0 4px; font-size: 12px; color: var(--text-muted);
-        }
-        .input-group input {
-            width: 100%; background: transparent; border: 1px solid var(--border-color);
-            color: var(--text-main); padding: 12px; border-radius: 8px; font-size: 16px;
-            outline: none; font-family: inherit; transition: border-color 0.2s;
-        }
-        .input-group input:focus { border-color: var(--accent); }
-
-        .results-card {
-            background: var(--card-bg); border: 1px solid var(--border-color);
-            border-radius: 16px; padding: 20px; display: none;
-        }
+        .input-group { margin-bottom: 12px; }
+        .input-group label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+        .input-group input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: transparent; color: var(--text-main); font-size: 16px; }
+        .results-card { background: var(--card-bg); padding: 20px; border-radius: 16px; display: none; }
         .results-card.active { display: block; }
-        .results-header { display: flex; justify-content: space-between; margin-bottom: 15px; }
-        .results-title { font-size: 16px; font-weight: bold; color: var(--text-muted); }
-        .results-save { font-size: 14px; color: #22c55e; cursor: pointer; background: none; border: none; }
-        .results-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 15px; }
-
-        .result-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(128,128,128,0.1); }
-        .result-item:last-child { border-bottom: none; padding-bottom: 0; }
-        .result-label { font-size: 14px; color: var(--text-muted); }
-        .result-value { font-size: 16px; font-weight: bold; text-align: right; color: var(--text-main); }
-        .result-angle { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
-
-        .hint { font-size: 12px; color: var(--text-muted); margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(128,128,128,0.1); line-height: 1.4; }
-
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+        .result-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .result-value { font-weight: bold; }
+        .hint { font-size: 12px; color: var(--text-muted); margin-top: 15px; }
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); padding: 20px; align-items: center; justify-content: center; }
         .modal-overlay.active { display: flex; }
-        .modal { background: var(--card-bg); border: 1px solid rgba(128,128,128,0.1); width: 100%; max-width: 340px; border-radius: 20px; padding: 20px; }
-        .modal h2 { margin: 0 0 20px 0; font-size: 18px; }
-        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-        .btn-text { background: none; border: none; color: var(--text-muted); font-size: 14px; cursor: pointer; }
-        .btn-save { background: var(--gradient); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .modal { background: var(--card-bg); padding: 20px; border-radius: 16px; width: 100%; max-width: 340px; }
     </style>
 </head>
 <body>
@@ -96,44 +43,23 @@
         <button class="settings-btn" onclick="openSettings()">⋮</button>
     </div>
 
-    <div class="shapes-scroll" id="shapesContainer">
-        <div class="shape-btn active" data-shape="trapezoid" onclick="selectShape('trapezoid')">
-            <svg viewBox="0 0 24 24"><path d="M4 6 L20 6 L16 18 L8 18 Z"/></svg>
-        </div>
-        <div class="shape-btn" data-shape="triangle" onclick="selectShape('triangle')">
-            <svg viewBox="0 0 24 24"><path d="M12 4 L20 20 L4 20 Z"/></svg>
-        </div>
-        <div class="shape-btn" data-shape="rightTriangle" onclick="selectShape('rightTriangle')">
-            <svg viewBox="0 0 24 24"><path d="M4 4 L4 20 L20 20 Z"/></svg>
-        </div>
-        <div class="shape-btn" data-shape="oneSlant" onclick="selectShape('oneSlant')">
-            <svg viewBox="0 0 24 24"><path d="M4 6 L16 6 L20 18 L4 18 Z"/></svg>
-        </div>
-        <div class="shape-btn" data-shape="rhombus" onclick="selectShape('rhombus')">
-            <svg viewBox="0 0 24 24"><path d="M12 2 L22 12 L12 22 L2 12 Z"/></svg>
-        </div>
-    </div>
+    <button class="shape-btn active" onclick="selectShape('rightTriangle')">Прямоугольный треугольник</button>
 
-    <div class="preview-box" id="previewBox">
-        Введите размеры стекла
-    </div>
+    <div class="preview-box" id="previewBox">Введите размеры стекла</div>
 
     <div class="inputs-container" id="inputsContainer"></div>
 
     <div class="results-card" id="resultsCard">
-        <div class="results-header">
-            <div class="results-title">Размеры рамки</div>
-            <button class="results-save" onclick="copyResults()">Сохранить</button>
-        </div>
-        <div class="results-sub" id="resultsSub">Фальц (отступ от края): 10.0 мм</div>
+        <div class="results-title" style="margin-bottom: 15px; font-weight: bold;">Размеры рамки</div>
+        <div class="results-sub" id="resultsSub" style="margin-bottom: 15px; font-size: 12px; color: var(--text-muted);"></div>
         <div id="resultsList"></div>
         <div class="hint">* Для запила в стык (угол/2) используйте половину указанного угла.</div>
     </div>
 
     <div class="modal-overlay" id="settingsModal">
         <div class="modal">
-            <h2>Настройки калькулятора</h2>
-            <div class="input-group" style="margin-bottom: 15px;">
+            <h2>Настройки</h2>
+            <div class="input-group">
                 <label>Фальц (отступ от края), мм</label>
                 <input type="number" id="inputFalz" value="10.0" step="0.1" oninput="calculate()">
             </div>
@@ -141,27 +67,16 @@
                 <label>Смещение пилы (припуск), мм</label>
                 <input type="number" id="inputPila" value="22.0" step="0.1" oninput="calculate()">
             </div>
-            <div class="modal-actions">
-                <button class="btn-text" onclick="closeSettings()">Отмена</button>
-                <button class="btn-save" onclick="saveSettings()">Сохранить</button>
-            </div>
+            <button onclick="closeSettings()" style="width: 100%; padding: 10px; margin-top: 10px; background: var(--accent); color: black; border: none; border-radius: 8px;">Сохранить</button>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram?.WebApp;
-        if (tg) {
-            tg.expand();
-            tg.ready();
-            document.documentElement.style.setProperty('--bg-color', tg.themeParams.bg_color || '#1a1a1a');
-            document.documentElement.style.setProperty('--card-bg', tg.themeParams.secondary_bg_color || '#2a2a2a');
-            document.documentElement.style.setProperty('--text-main', tg.themeParams.text_color || '#ffffff');
-            document.documentElement.style.setProperty('--text-muted', tg.themeParams.hint_color || '#888888');
-            document.documentElement.style.setProperty('--accent', tg.themeParams.link_color || '#0ea5e9');
-        }
+        if (tg) { tg.expand(); tg.ready(); }
 
         let settings = { falz: 10.0, pila: 22.0 };
-        let currentShape = 'trapezoid';
+        let currentShape = 'rightTriangle';
 
         function loadSettings() {
             try {
@@ -176,356 +91,96 @@
             settings.falz = parseFloat(document.getElementById('inputFalz').value) || 10.0;
             settings.pila = parseFloat(document.getElementById('inputPila').value) || 22.0;
             localStorage.setItem('glassSettings', JSON.stringify(settings));
-            if (tg?.CloudStorage) tg.CloudStorage.setItem('glassSettings', JSON.stringify(settings), () => {});
             closeSettings();
             calculate();
         }
 
         function openSettings() { document.getElementById('settingsModal').classList.add('active'); }
         function closeSettings() { document.getElementById('settingsModal').classList.remove('active'); }
-
-        function selectShape(shape) {
-            currentShape = shape;
-            document.querySelectorAll('.shape-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector(`[data-shape="${shape}"]`).classList.add('active');
-            renderInputs();
-            calculate();
-        }
+        function selectShape(shape) { currentShape = shape; renderInputs(); calculate(); }
 
         function renderInputs() {
             const container = document.getElementById('inputsContainer');
-            container.innerHTML = '';
-            if (currentShape === 'trapezoid') {
-                container.innerHTML = `
-                    <div class="input-group"><label>Нижнее основание (мм)</label><input type="number" id="inp1" oninput="calculate()"></div>
-                    <div class="input-group"><label>Верхнее основание (мм)</label><input type="number" id="inp2" oninput="calculate()"></div>
-                    <div class="input-group"><label>Высота (мм)</label><input type="number" id="inp3" oninput="calculate()"></div>
-                `;
-            } else if (currentShape === 'triangle') {
-                container.innerHTML = `
-                    <div class="input-group"><label>Низ (основание) (мм)</label><input type="number" id="inp1" oninput="calculate()"></div>
-                    <div class="input-group"><label>Высота (мм)</label><input type="number" id="inp2" oninput="calculate()"></div>
-                `;
-            } else if (currentShape === 'rightTriangle') {
-                container.innerHTML = `
-                    <div class="input-group"><label>Горизонтальный катет (мм)</label><input type="number" id="inp1" oninput="calculate()"></div>
-                    <div class="input-group"><label>Вертикальный катет (мм)</label><input type="number" id="inp2" oninput="calculate()"></div>
-                `;
-            } else if (currentShape === 'oneSlant') {
-                container.innerHTML = `
-                    <div class="input-group"><label>Низ (мм)</label><input type="number" id="inp1" oninput="calculate()"></div>
-                    <div class="input-row">
-                        <div class="input-group"><label>Левая высота</label><input type="number" id="inp2" oninput="calculate()"></div>
-                        <div class="input-group"><label>Правая высота</label><input type="number" id="inp3" oninput="calculate()"></div>
-                    </div>
-                `;
-            } else if (currentShape === 'rhombus') {
-                container.innerHTML = `
-                    <div class="input-group"><label>Диагональ А (горизонтальная) (мм)</label><input type="number" id="inp1" oninput="calculate()"></div>
-                    <div class="input-group"><label>Диагональ В (вертикальная) (мм)</label><input type="number" id="inp2" oninput="calculate()"></div>
-                `;
-            }
+            container.innerHTML = `
+                <div class="input-group"><label>Горизонтальный катет (мм)</label><input type="number" id="inp1" oninput="calculate()"></div>
+                <div class="input-group"><label>Вертикальный катет (мм)</label><input type="number" id="inp2" oninput="calculate()"></div>
+            `;
         }
 
         const r = (num) => Math.round(num * 10) / 10;
         const r2d = (rad) => rad * 180 / Math.PI;
-        const cot = (deg) => 1 / Math.tan(deg * Math.PI / 180);
 
         function calculate() {
             const falz = settings.falz;
             const pila = settings.pila;
-            const v = (id) => parseFloat(document.getElementById(id)?.value);
+            const a = parseFloat(document.getElementById('inp1')?.value) || 0;
+            const b = parseFloat(document.getElementById('inp2')?.value) || 0;
 
             let results = [];
             let valid = false;
-            let svgContent = '';
-            let subText = `Фальц: ${falz.toFixed(1)} мм + пила: ${pila.toFixed(1)} мм`;
 
-            const drawPath = (d, pts, angles) => {
-                let svg = `<svg viewBox="0 0 300 240">
-                    <path d="${d}" fill="none" stroke="#888" stroke-width="4" stroke-linejoin="round"/>`;
-                if (pts) pts.forEach(p => {
-                    if(p.val) svg += `<text x="${p.x}" y="${p.y}" class="svg-text-size" text-anchor="middle" ${p.rot ? `transform="rotate(${p.rot} ${p.x} ${p.y})"` : ''}>${p.val}</text>`;
-                });
-                if (angles) angles.forEach(a => {
-                    if(a.val) svg += `<text x="${a.x}" y="${a.y}" class="svg-text-angle" text-anchor="middle">${a.val}</text>`;
-                });
-                svg += `</svg>`;
-                return svg;
-            };
+            if (a > 0 && b > 0) {
+                valid = true;
+                
+                // Углы
+                const alpha = r2d(Math.atan(b / a)); 
+                const beta = 90 - alpha;
 
-            // --- ТРАПЕЦИЯ ---
-            if (currentShape === 'trapezoid') {
-                const b = v('inp1'), t = v('inp2'), h = v('inp3');
-                if (b > 0 && t > 0 && h > 0 && t <= b) {
-                    valid = true;
-                    
-                    const diff = (b - t) / 2;
-                    const slant = Math.sqrt(diff*diff + h*h);
-                    const angleSlantVert = r2d(Math.atan(diff / h));
-                    
-                    const angleBottom = 90 + angleSlantVert;
-                    const angleTop = 90 - angleSlantVert;
+                // --- ПРАВИЛЬНАЯ ФОРМУЛА СМЕЩЕНИЯ ВНУТРЬ НА falz ---
+                // При смещении линии внутрь на 10 мм, длина катета меняется на:
+                // 1) срез под 45 градусов на одном конце (falz)
+                // 2) срез под углом гипотенузы на другом конце
+                const frameA = a - falz - falz / Math.sin(alpha * Math.PI / 180);
+                const frameB = b - falz - falz / Math.cos(alpha * Math.PI / 180);
+                const frameC = Math.sqrt(a*a + b*b) - falz / Math.sin(alpha * Math.PI / 180) - falz / Math.cos(alpha * Math.PI / 180);
 
-                    const frameBottom = b - falz * (cot(45) + cot(angleBottom/2)) + pila;
-                    const frameTop = t - falz * (cot(45) + cot(angleTop/2)) + pila;
-                    const frameSlant = slant - falz * (cot(angleBottom/2) + cot(angleTop/2)) + pila;
+                results = [
+                    { label: 'Катет A (низ)', val: frameA + pila, angle: 45 },
+                    { label: 'Гипотенуза', val: frameC + pila, angle: alpha },
+                    { label: 'Катет B (бок)', val: frameB + pila, angle: 90 }
+                ];
 
-                    const cutBottom = (180 - angleBottom) / 2;
-                    const cutTop = (180 - angleTop) / 2;
+                // Отрисовка
+                const scale = Math.min(150/a, 160/b, 2);
+                const w = a * scale, hh = b * scale;
+                const cx = 150, cy = 130;
+                const x1 = cx - w/2, x2 = cx + w/2, y1 = cy + hh/2, y2 = cy - hh/2;
 
-                    results = [
-                        { label: 'Низ', val: frameBottom, angle: cutBottom },
-                        { label: 'Правая боковая', val: frameSlant, angle: cutBottom },
-                        { label: 'Верх', val: frameTop, angle: cutTop },
-                        { label: 'Левая боковая', val: frameSlant, angle: cutBottom }
-                    ];
-
-                    const scale = Math.min(180/b, 160/h, 2);
-                    const w = b * scale, wTop = t * scale, hh = h * scale;
-                    const cx = 150, cy = 120;
-                    const x1 = cx - w/2, x2 = cx + w/2;
-                    const y1 = cy + hh/2, y2 = cy - hh/2;
-                    const xt1 = cx - wTop/2, xt2 = cx + wTop/2;
-                    
-                    svgContent = drawPath(`M ${x1} ${y1} L ${x2} ${y1} L ${xt2} ${y2} L ${xt1} ${y2} Z`, 
-                        [
-                            {val: 'Р:' + r(frameBottom), x: cx, y: y1 - 8},
-                            {val: 'Р:' + r(frameTop), x: cx, y: y2 + 15},
-                            {val: 'Р:' + r(frameSlant), x: x1 + 25, y: cy, rot: -90},
-                            {val: 'Р:' + r(frameSlant), x: x2 - 25, y: cy, rot: 90}
-                        ],
-                        [
-                            {val: r(cutBottom) + '°', x: x1 + 20, y: y1 - 5},
-                            {val: r(cutBottom) + '°', x: x2 - 20, y: y1 - 5},
-                            {val: r(cutTop) + '°', x: xt1 + 15, y: y2 - 5},
-                            {val: r(cutTop) + '°', x: xt2 - 15, y: y2 - 5}
-                        ]
-                    );
-                }
-            } 
-            // --- РАВНОБЕДРЕННЫЙ ТРЕУГОЛЬНИК ---
-            else if (currentShape === 'triangle') {
-                const b = v('inp1'), h = v('inp2');
-                if (b > 0 && h > 0) {
-                    valid = true;
-                    
-                    const half = b / 2;
-                    const side = Math.sqrt(half*half + h*h);
-                    const angleSlantVert = r2d(Math.atan(half / h));
-                    
-                    const angleBottom = 90 + angleSlantVert;
-                    const angleTop = 2 * angleSlantVert;
-
-                    const frameBottom = b - falz * (cot(45) + cot(angleBottom/2)) + pila;
-                    const frameSide = side - falz * (cot(angleBottom/2) + cot(angleTop/2)) + pila;
-                    
-                    const cutBottom = (180 - angleBottom) / 2;
-                    const cutTop = (180 - angleTop) / 2;
-
-                    results = [
-                        { label: 'Низ (основание)', val: frameBottom, angle: cutBottom },
-                        { label: 'Правая сторона', val: frameSide, angle: cutBottom },
-                        { label: 'Левая сторона', val: frameSide, angle: cutBottom }
-                    ];
-
-                    const scale = Math.min(180/b, 160/h, 2);
-                    const w = b * scale, hh = h * scale;
-                    const cx = 150, cy = 140;
-                    const x1 = cx - w/2, x2 = cx + w/2, y1 = cy + hh/2, y2 = cy - hh/2;
-
-                    svgContent = drawPath(`M ${x1} ${y1} L ${x2} ${y1} L ${cx} ${y2} Z`,
-                        [
-                            {val: 'Р:' + r(frameBottom), x: cx, y: y1 - 8},
-                            {val: 'Р:' + r(frameSide), x: cx - w/4, y: cy + 10, rot: -angleSlantVert},
-                            {val: 'Р:' + r(frameSide), x: cx + w/4, y: cy + 10, rot: angleSlantVert}
-                        ],
-                        [
-                            {val: r(cutBottom)+'°', x: x1 + 20, y: y1 - 5},
-                            {val: r(cutBottom)+'°', x: x2 - 20, y: y1 - 5},
-                            {val: r(cutTop)+'°', x: cx, y: y2 + 15}
-                        ]
-                    );
-                }
-            } 
-            // --- ПРЯМОУГОЛЬНЫЙ ТРЕУГОЛЬНИК ---
-            else if (currentShape === 'rightTriangle') {
-                const a = v('inp1'), b = v('inp2');
-                if (a > 0 && b > 0) {
-                    valid = true;
-                    
-                    const alpha = r2d(Math.atan(b / a)); 
-                    const beta = 90 - alpha;
-                    
-                    const frameA = a - falz * (cot(45) + cot(beta/2)) + pila;
-                    const frameB = b - falz * (cot(45) + cot(alpha/2)) + pila;
-                    const frameC = Math.sqrt(a*a + b*b) - falz * (cot(alpha/2) + cot(beta/2)) + pila;
-
-                    results = [
-                        { label: 'Катет A (низ)', val: frameA, angle: 45 },
-                        { label: 'Гипотенуза', val: frameC, angle: alpha },
-                        { label: 'Катет B (бок)', val: frameB, angle: 90 }
-                    ];
-
-                    const scale = Math.min(150/a, 160/b, 2);
-                    const w = a * scale, hh = b * scale;
-                    const cx = 150, cy = 130;
-                    const x1 = cx - w/2, x2 = cx + w/2, y1 = cy + hh/2, y2 = cy - hh/2;
-
-                    svgContent = drawPath(`M ${x1} ${y1} L ${x2} ${y1} L ${x1} ${y2} Z`,
-                        [
-                            {val: 'Р: ' + r(frameA), x: cx, y: y1 - 8}, 
-                            {val: 'Р: ' + r(frameC), x: cx - w/4, y: cy + 15, rot: -alpha}, 
-                            {val: 'Р: ' + r(frameB), x: x1 + 20, y: cy, rot: -90} 
-                        ],
-                        [
-                            {val: '45.0°', x: x1 + 20, y: y1 - 5},
-                            {val: r(90 - (alpha / 2))+'°', x: x2 - 20, y: y1 - 5},
-                            {val: r(alpha)+'°', x: x1 + 15, y: y2 + 15}
-                        ]
-                    );
-                }
-            } 
-            // --- ОДНА НАКЛОННАЯ СТОРОНА ---
-            else if (currentShape === 'oneSlant') {
-                const b = v('inp1'), leftH = v('inp2'), rightH = v('inp3');
-                if (b > 0 && leftH > 0 && rightH > 0) {
-                    valid = true;
-                    
-                    const diff = Math.abs(leftH - rightH);
-                    const top = Math.sqrt(b*b + diff*diff);
-                    const angleSlantHoriz = r2d(Math.atan(diff / b));
-                    
-                    const angleBottom = 90 + angleSlantHoriz;
-                    const angleTop = 90 - angleSlantHoriz;
-
-                    const frameBottom = b - falz * (cot(45) + cot(angleBottom/2)) + pila;
-                    const frameLeft = leftH - falz * (cot(angleBottom/2) + cot(45)) + pila;
-                    const frameRight = rightH - falz * (cot(angleTop/2) + cot(45)) + pila;
-                    const frameTop = top - falz * (cot(angleBottom/2) + cot(angleTop/2)) + pila;
-
-                    const cutBottom = (180 - angleBottom) / 2;
-                    const cutTop = (180 - angleTop) / 2;
-
-                    results = [
-                        { label: 'Низ', val: frameBottom, angle: cutBottom },
-                        { label: 'Правая', val: frameRight, angle: 45 },
-                        { label: 'Верхняя (наклон)', val: frameTop, angle: cutTop },
-                        { label: 'Левая', val: frameLeft, angle: 45 }
-                    ];
-
-                    const scale = Math.min(160/b, 140/Math.max(leftH, rightH), 2);
-                    const w = b * scale, h1 = leftH * scale, h2 = rightH * scale;
-                    const cx = 150, cy = 120;
-                    const x1 = cx - w/2, x2 = cx + w/2;
-                    const y1 = cy + Math.max(h1,h2)/2, y2 = y1 - h1, y3 = y1 - h2;
-
-                    svgContent = drawPath(`M ${x1} ${y1} L ${x2} ${y1} L ${x2} ${y3} L ${x1} ${y2} Z`,
-                        [
-                            {val: 'Р:' + r(frameBottom), x: cx, y: y1 - 8},
-                            {val: 'Р:' + r(frameTop), x: cx - 20, y: y2 + (y3-y2)/2, rot: -angleSlantHoriz},
-                            {val: 'Р:' + r(frameRight), x: x2 - 20, y: cy, rot: 90},
-                            {val: 'Р:' + r(frameLeft), x: x1 + 20, y: cy, rot: -90}
-                        ],
-                        [
-                            {val: r(cutBottom)+'°', x: x1 + 20, y: y1 - 5},
-                            {val: r(cutBottom)+'°', x: x2 - 20, y: y1 - 5},
-                            {val: r(cutTop)+'°', x: x1 + 15, y: y2 + 15},
-                            {val: r(cutTop)+'°', x: x2 - 15, y: y3 + 15}
-                        ]
-                    );
-                }
-            } 
-            // --- РОМБ ---
-            else if (currentShape === 'rhombus') {
-                const a = v('inp1'), b = v('inp2');
-                if (a > 0 && b > 0) {
-                    valid = true;
-                    
-                    const side = Math.sqrt((a/2)**2 + (b/2)**2);
-                    const angleAtHoriz = 2 * r2d(Math.atan((b/2) / (a/2))); 
-                    const angleAtVert = 180 - angleAtHoriz;
-                    
-                    const cutHoriz = angleAtHoriz / 2;
-                    const cutVert = angleAtVert / 2;
-                    
-                    const frameSide = side - falz * (cot(cutHoriz) + cot(cutVert)) + pila;
-
-                    results = [
-                        { label: 'Все стороны (4 шт)', val: frameSide, angle: cutHoriz }
-                    ];
-
-                    const scale = Math.min(180/a, 160/b, 2);
-                    const w = a * scale, hh = b * scale;
-                    const cx = 150, cy = 120;
-                    const x1 = cx, x2 = cx - w/2, x3 = cx, x4 = cx + w/2;
-                    const y1 = cy - hh/2, y2 = cy, y3 = cy + hh/2, y4 = cy;
-
-                    svgContent = drawPath(`M ${x1} ${y1} L ${x4} ${y4} L ${x3} ${y3} L ${x2} ${y2} Z`,
-                        [
-                            {val: 'Р:' + r(frameSide), x: cx - w/4, y: cy - hh/4, rot: -r2d(Math.atan(b/a))},
-                            {val: 'Р:' + r(frameSide), x: cx + w/4, y: cy - hh/4, rot: r2d(Math.atan(b/a))},
-                            {val: 'Р:' + r(frameSide), x: cx - w/4, y: cy + hh/4, rot: r2d(Math.atan(b/a))},
-                            {val: 'Р:' + r(frameSide), x: cx + w/4, y: cy + hh/4, rot: -r2d(Math.atan(b/a))}
-                        ],
-                        [
-                            {val: r(cutHoriz)+'°', x: x2 + 15, y: cy},
-                            {val: r(cutHoriz)+'°', x: x4 - 15, y: cy},
-                            {val: r(cutVert)+'°', x: cx, y: y1 + 15},
-                            {val: r(cutVert)+'°', x: cx, y: y3 - 15}
-                        ]
-                    );
-                }
+                document.getElementById('previewBox').innerHTML = `
+                    <svg viewBox="0 0 300 240">
+                        <path d="M ${x1} ${y1} L ${x2} ${y1} L ${x1} ${y2} Z" fill="none" stroke="#888" stroke-width="4"/>
+                        <text x="${cx}" y="${y1 - 8}" fill="#22c55e" font-size="13" text-anchor="middle">Р:${r(frameA+pila)}</text>
+                        <text x="${cx - w/4}" y="${cy + 15}" fill="#22c55e" font-size="13" text-anchor="middle" transform="rotate(${-alpha} ${cx - w/4} ${cy + 15})">Р:${r(frameC+pila)}</text>
+                        <text x="${x1 + 20}" y="${cy}" fill="#22c55e" font-size="13" text-anchor="middle" transform="rotate(-90 ${x1 + 20} ${cy})">Р:${r(frameB+pila)}</text>
+                    </svg>
+                `;
             }
 
-            renderResults(results, valid, svgContent, subText);
-        }
-
-        function renderResults(results, valid, svgContent, subText) {
-            const previewBox = document.getElementById('previewBox');
             const card = document.getElementById('resultsCard');
-            const sub = document.getElementById('resultsSub');
             const list = document.getElementById('resultsList');
+            const sub = document.getElementById('resultsSub');
 
             if (!valid) {
-                previewBox.innerHTML = 'Введите корректные размеры';
+                document.getElementById('previewBox').innerHTML = 'Введите размеры стекла';
                 card.classList.remove('active');
                 return;
             }
 
-            if (svgContent) previewBox.innerHTML = svgContent;
-            
             card.classList.add('active');
-            sub.innerText = subText;
+            sub.innerText = `Фальц: ${falz.toFixed(1)} мм + пила: ${pila.toFixed(1)} мм`;
             
             list.innerHTML = '';
             results.forEach(res => {
                 list.innerHTML += `
                     <div class="result-item">
-                        <div>
-                            <div class="result-label">${res.label}</div>
-                        </div>
+                        <div>${res.label}</div>
                         <div style="text-align: right;">
                             <div class="result-value">${res.val.toFixed(1)} мм</div>
-                            ${res.angle ? `<div class="result-angle">Угол: ${res.angle.toFixed(1)}°</div>` : ''}
+                            <div style="font-size: 12px; color: var(--text-muted);">Угол: ${res.angle.toFixed(1)}°</div>
                         </div>
                     </div>
                 `;
             });
-        }
-
-        function copyResults() {
-            const list = document.getElementById('resultsList');
-            const text = list.innerText;
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(text).then(() => {
-                    if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                    if (tg?.showAlert) tg.showAlert('Скопировано в буфер обмена!');
-                    else alert('Скопировано!');
-                });
-            } else {
-                alert('Не удалось скопировать');
-            }
         }
 
         window.onload = () => {
