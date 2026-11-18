@@ -224,7 +224,7 @@
         const r = (num) => Math.round(num * 10) / 10;
         const r2d = (rad) => rad * 180 / Math.PI;
 
-        // --- ТОЧНЫЙ ПОРТ ФУНКЦИИ offsetPolygon ИЗ СТАРОГО КОДА ---
+        // --- ТОЧНЫЙ ПОРТ ФУНКЦИИ offsetPolygon ---
         function lineIntersection(p1, p2, p3, p4) {
             const a1 = p2.y - p1.y;
             const b1 = p1.x - p2.x;
@@ -296,16 +296,105 @@
                 return svg;
             };
 
+            // --- ТРАПЕЦИЯ ---
+            if (currentShape === 'trapezoid') {
+                const b = v('inp1'), t = v('inp2'), h = v('inp3');
+                if (b > 0 && t > 0 && h > 0 && t <= b) {
+                    const diff = (b - t) / 2;
+                    const rawPoly = [{x: 0, y: 0}, {x: b, y: 0}, {x: b - diff, y: h}, {x: diff, y: h}];
+                    const innerPoly = offsetPolygon(rawPoly, falz);
+                    if (innerPoly) {
+                        valid = true;
+                        const angleSlantVert = r2d(Math.atan(diff / h));
+                        const cutBottom = 90 - angleSlantVert / 2;
+                        const cutTop = 90 + angleSlantVert / 2;
+
+                        const lenBottom = Math.sqrt((innerPoly[1].x-innerPoly[0].x)**2 + (innerPoly[1].y-innerPoly[0].y)**2);
+                        const lenRight = Math.sqrt((innerPoly[2].x-innerPoly[1].x)**2 + (innerPoly[2].y-innerPoly[1].y)**2);
+                        const lenTop = Math.sqrt((innerPoly[3].x-innerPoly[2].x)**2 + (innerPoly[3].y-innerPoly[2].y)**2);
+                        const lenLeft = Math.sqrt((innerPoly[0].x-innerPoly[3].x)**2 + (innerPoly[0].y-innerPoly[3].y)**2);
+
+                        results = [
+                            { label: 'Низ', val: lenBottom, angle: cutBottom },
+                            { label: 'Правая боковая', val: lenRight, angle: cutBottom },
+                            { label: 'Верх', val: lenTop, angle: cutTop },
+                            { label: 'Левая боковая', val: lenLeft, angle: cutBottom }
+                        ];
+
+                        const scale = Math.min(180/b, 160/h, 2);
+                        const w = b * scale, wTop = t * scale, hh = h * scale;
+                        const cx = 150, cy = 120;
+                        const x1 = cx - w/2, x2 = cx + w/2;
+                        const y1 = cy + hh/2, y2 = cy - hh/2;
+                        const xt1 = cx - wTop/2, xt2 = cx + wTop/2;
+                        
+                        svgContent = drawPath(`M ${x1} ${y1} L ${x2} ${y1} L ${xt2} ${y2} L ${xt1} ${y2} Z`, 
+                            [
+                                {val: 'Р:' + r(lenBottom), x: cx, y: y1 - 8},
+                                {val: 'Р:' + r(lenTop), x: cx, y: y2 + 15},
+                                {val: 'Р:' + r(lenRight), x: x1 + 25, y: cy, rot: -90},
+                                {val: 'Р:' + r(lenLeft), x: x2 - 25, y: cy, rot: 90}
+                            ],
+                            [
+                                {val: r(cutBottom) + '°', x: x1 + 20, y: y1 - 5},
+                                {val: r(cutBottom) + '°', x: x2 - 20, y: y1 - 5},
+                                {val: r(cutTop) + '°', x: xt1 + 15, y: y2 - 5},
+                                {val: r(cutTop) + '°', x: xt2 - 15, y: y2 - 5}
+                            ]
+                        );
+                    }
+                }
+            } 
+            // --- РАВНОБЕДРЕННЫЙ ТРЕУГОЛЬНИК ---
+            else if (currentShape === 'triangle') {
+                const b = v('inp1'), h = v('inp2');
+                if (b > 0 && h > 0) {
+                    const rawPoly = [{x: 0, y: 0}, {x: b, y: 0}, {x: b/2, y: h}];
+                    const innerPoly = offsetPolygon(rawPoly, falz);
+                    if (innerPoly) {
+                        valid = true;
+                        const alpha = r2d(Math.atan((b/2) / h));
+                        const cutBase = 90 - alpha / 2;
+                        const cutTop = alpha;
+
+                        const lenBase = Math.sqrt((innerPoly[1].x-innerPoly[0].x)**2 + (innerPoly[1].y-innerPoly[0].y)**2);
+                        const lenRight = Math.sqrt((innerPoly[2].x-innerPoly[1].x)**2 + (innerPoly[2].y-innerPoly[1].y)**2);
+                        const lenLeft = Math.sqrt((innerPoly[0].x-innerPoly[2].x)**2 + (innerPoly[0].y-innerPoly[2].y)**2);
+
+                        results = [
+                            { label: 'Низ (основание)', val: lenBase, angle: cutBase },
+                            { label: 'Правая сторона', val: lenRight, angle: cutBase },
+                            { label: 'Левая сторона', val: lenLeft, angle: cutBase }
+                        ];
+
+                        const scale = Math.min(180/b, 160/h, 2);
+                        const w = b * scale, hh = h * scale;
+                        const cx = 150, cy = 140;
+                        const x1 = cx - w/2, x2 = cx + w/2, y1 = cy + hh/2, y2 = cy - hh/2;
+
+                        svgContent = drawPath(`M ${x1} ${y1} L ${x2} ${y1} L ${cx} ${y2} Z`,
+                            [
+                                {val: 'Р:' + r(lenBase), x: cx, y: y1 - 8},
+                                {val: 'Р:' + r(lenRight), x: cx - w/4, y: cy + 10, rot: -alpha},
+                                {val: 'Р:' + r(lenLeft), x: cx + w/4, y: cy + 10, rot: alpha}
+                            ],
+                            [
+                                {val: r(cutBase)+'°', x: x1 + 20, y: y1 - 5},
+                                {val: r(cutBase)+'°', x: x2 - 20, y: y1 - 5},
+                                {val: r(cutTop)+'°', x: cx, y: y2 + 15}
+                            ]
+                        );
+                    }
+                }
+            } 
             // --- ПРЯМОУГОЛЬНЫЙ ТРЕУГОЛЬНИК ---
-            if (currentShape === 'rightTriangle') {
+            else if (currentShape === 'rightTriangle') {
                 const a = v('inp1'), b = v('inp2');
                 if (a > 0 && b > 0) {
-                    valid = true;
-                    
                     const rawPoly = [{x: 0, y: 0}, {x: a, y: 0}, {x: 0, y: b}];
                     const innerPoly = offsetPolygon(rawPoly, falz);
-                    
                     if (innerPoly) {
+                        valid = true;
                         const p1 = innerPoly[0], p2 = innerPoly[1], p3 = innerPoly[2];
                         
                         const lenA = Math.sqrt((p2.x - p1.x)**2 + (p2.y - p1.y)**2);
@@ -319,11 +408,114 @@
                             { label: 'Гипотенуза', val: lenC, angle: alpha },
                             { label: 'Катет B (бок)', val: lenB, angle: 90 }
                         ];
+
+                        const scale = Math.min(150/a, 160/b, 2);
+                        const w = a * scale, hh = b * scale;
+                        const cx = 150, cy = 130;
+                        const x1 = cx - w/2, x2 = cx + w/2, y1 = cy + hh/2, y2 = cy - hh/2;
+
+                        svgContent = drawPath(`M ${x1} ${y1} L ${x2} ${y1} L ${x1} ${y2} Z`,
+                            [
+                                {val: 'Р: ' + r(lenA), x: cx, y: y1 - 8}, 
+                                {val: 'Р: ' + r(lenC), x: cx - w/4, y: cy + 15, rot: -alpha}, 
+                                {val: 'Р: ' + r(lenB), x: x1 + 20, y: cy, rot: -90} 
+                            ],
+                            [
+                                {val: '45.0°', x: x1 + 20, y: y1 - 5},
+                                {val: '90.0°', x: x2 - 20, y: y1 - 5},
+                                {val: r(alpha)+'°', x: x1 + 15, y: y2 + 15}
+                            ]
+                        );
+                    }
+                }
+            } 
+            // --- ОДНА НАКЛОННАЯ СТОРОНА ---
+            else if (currentShape === 'oneSlant') {
+                const b = v('inp1'), leftH = v('inp2'), rightH = v('inp3');
+                if (b > 0 && leftH > 0 && rightH > 0) {
+                    const rawPoly = [{x: 0, y: 0}, {x: b, y: 0}, {x: b, y: rightH}, {x: 0, y: leftH}];
+                    const innerPoly = offsetPolygon(rawPoly, falz);
+                    if (innerPoly) {
+                        valid = true;
+                        const diff = Math.abs(leftH - rightH);
+                        const angleSlant = r2d(Math.atan(diff / b));
+                        
+                        const lenBottom = Math.sqrt((innerPoly[1].x-innerPoly[0].x)**2 + (innerPoly[1].y-innerPoly[0].y)**2);
+                        const lenRight = Math.sqrt((innerPoly[2].x-innerPoly[1].x)**2 + (innerPoly[2].y-innerPoly[1].y)**2);
+                        const lenTop = Math.sqrt((innerPoly[3].x-innerPoly[2].x)**2 + (innerPoly[3].y-innerPoly[2].y)**2);
+                        const lenLeft = Math.sqrt((innerPoly[0].x-innerPoly[3].x)**2 + (innerPoly[0].y-innerPoly[3].y)**2);
+
+                        results = [
+                            { label: 'Низ', val: lenBottom, angle: 45 },
+                            { label: 'Правая', val: lenRight, angle: 45 },
+                            { label: 'Верхняя (наклон)', val: lenTop, angle: angleSlant },
+                            { label: 'Левая', val: lenLeft, angle: 45 }
+                        ];
+
+                        const scale = Math.min(160/b, 140/Math.max(leftH, rightH), 2);
+                        const w = b * scale, h1 = leftH * scale, h2 = rightH * scale;
+                        const cx = 150, cy = 120;
+                        const x1 = cx - w/2, x2 = cx + w/2;
+                        const y1 = cy + Math.max(h1,h2)/2, y2 = y1 - h1, y3 = y1 - h2;
+
+                        svgContent = drawPath(`M ${x1} ${y1} L ${x2} ${y1} L ${x2} ${y3} L ${x1} ${y2} Z`,
+                            [
+                                {val: 'Р:' + r(lenBottom), x: cx, y: y1 - 8},
+                                {val: 'Р:' + r(lenTop), x: cx - 20, y: y2 + (y3-y2)/2, rot: -angleSlant},
+                                {val: 'Р:' + r(lenRight), x: x2 - 20, y: cy, rot: 90},
+                                {val: 'Р:' + r(lenLeft), x: x1 + 20, y: cy, rot: -90}
+                            ],
+                            [
+                                {val: '45.0°', x: x1 + 20, y: y1 - 5},
+                                {val: '45.0°', x: x2 - 20, y: y1 - 5},
+                                {val: r(angleSlant)+'°', x: x1 + 15, y: y2 + 15},
+                                {val: r(angleSlant)+'°', x: x2 - 15, y: y3 + 15}
+                            ]
+                        );
+                    }
+                }
+            } 
+            // --- РОМБ ---
+            else if (currentShape === 'rhombus') {
+                const a = v('inp1'), b = v('inp2');
+                if (a > 0 && b > 0) {
+                    const rawPoly = [{x: a/2, y: 0}, {x: a, y: b/2}, {x: a/2, y: b}, {x: 0, y: b/2}];
+                    const innerPoly = offsetPolygon(rawPoly, falz);
+                    if (innerPoly) {
+                        valid = true;
+                        const angleHoriz = 2 * r2d(Math.atan((b/2) / (a/2)));
+                        const cutHoriz = angleHoriz / 2;
+                        const cutVert = 90 - cutHoriz;
+
+                        const len = Math.sqrt((innerPoly[1].x-innerPoly[0].x)**2 + (innerPoly[1].y-innerPoly[0].y)**2);
+
+                        results = [
+                            { label: 'Все стороны (4 шт)', val: len, angle: cutHoriz }
+                        ];
+
+                        const scale = Math.min(180/a, 160/b, 2);
+                        const w = a * scale, hh = b * scale;
+                        const cx = 150, cy = 120;
+                        const x1 = cx, x2 = cx - w/2, x3 = cx, x4 = cx + w/2;
+                        const y1 = cy - hh/2, y2 = cy, y3 = cy + hh/2, y4 = cy;
+
+                        svgContent = drawPath(`M ${x1} ${y1} L ${x4} ${y4} L ${x3} ${y3} L ${x2} ${y2} Z`,
+                            [
+                                {val: 'Р:' + r(len), x: cx - w/4, y: cy - hh/4, rot: -r2d(Math.atan(b/a))},
+                                {val: 'Р:' + r(len), x: cx + w/4, y: cy - hh/4, rot: r2d(Math.atan(b/a))},
+                                {val: 'Р:' + r(len), x: cx - w/4, y: cy + hh/4, rot: r2d(Math.atan(b/a))},
+                                {val: 'Р:' + r(len), x: cx + w/4, y: cy + hh/4, rot: -r2d(Math.atan(b/a))}
+                            ],
+                            [
+                                {val: r(cutHoriz)+'°', x: x2 + 15, y: cy},
+                                {val: r(cutHoriz)+'°', x: x4 - 15, y: cy},
+                                {val: r(cutVert)+'°', x: cx, y: y1 + 15},
+                                {val: r(cutVert)+'°', x: cx, y: y3 - 15}
+                            ]
+                        );
                     }
                 }
             }
-            
-            // (Остальные фигуры я тоже перевёл на offsetPolygon, они будут работать по аналогии)
 
             renderResults(results, valid, svgContent, subText);
         }
