@@ -25,7 +25,6 @@
             padding-bottom: 30px;
         }
 
-        /* Заголовок */
         .header {
             display: flex; justify-content: space-between; align-items: center;
             margin-bottom: 20px; padding: 0 5px;
@@ -33,7 +32,6 @@
         .header h1 { font-size: 20px; font-weight: 800; margin: 0; }
         .settings-btn { background: none; border: none; color: white; font-size: 22px; cursor: pointer; }
 
-        /* Типы фигур */
         .shapes-scroll {
             display: flex; gap: 10px; overflow-x: auto;
             padding-bottom: 10px; margin-bottom: 15px;
@@ -52,15 +50,15 @@
         }
         .shape-btn svg { width: 32px; height: 32px; stroke: currentColor; fill: none; stroke-width: 2; }
 
-        /* Экран предпросмотра (условный) */
         .preview-box {
             background: var(--card-bg); border: 1px solid var(--border-color);
-            border-radius: 16px; height: 180px; display: flex; align-items: center; justify-content: center;
-            margin-bottom: 20px; color: var(--text-muted); font-size: 14px; text-align: center;
-            position: relative; overflow: hidden;
+            border-radius: 16px; height: 240px; display: flex; align-items: center; justify-content: center;
+            margin-bottom: 20px; position: relative; overflow: hidden;
         }
+        .preview-box svg { width: 100%; height: 100%; }
+        .preview-box .svg-text { font-family: sans-serif; fill: var(--text-main); font-size: 14px; font-weight: bold; }
+        .preview-box .svg-angle { font-family: sans-serif; fill: var(--text-muted); font-size: 11px; }
 
-        /* Поля ввода */
         .inputs-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
         .input-row { display: flex; gap: 10px; }
         .input-group { flex: 1; position: relative; }
@@ -76,7 +74,6 @@
         }
         .input-group input:focus { border-color: var(--accent); }
 
-        /* Результаты */
         .results-card {
             background: var(--card-bg); border: 1px solid var(--border-color);
             border-radius: 16px; padding: 20px; display: none;
@@ -98,7 +95,6 @@
 
         .hint { font-size: 12px; color: var(--text-muted); margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.06); line-height: 1.4; }
 
-        /* Модалка настроек */
         .modal-overlay {
             display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
             backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
@@ -122,7 +118,6 @@
         <button class="settings-btn" onclick="openSettings()">⋮</button>
     </div>
 
-    <!-- Переключатель фигур -->
     <div class="shapes-scroll" id="shapesContainer">
         <div class="shape-btn active" data-shape="trapezoid" onclick="selectShape('trapezoid')">
             <svg viewBox="0 0 24 24"><path d="M4 6 L20 6 L16 18 L8 18 Z"/></svg>
@@ -136,22 +131,19 @@
         <div class="shape-btn" data-shape="oneSlant" onclick="selectShape('oneSlant')">
             <svg viewBox="0 0 24 24"><path d="M4 6 L16 6 L20 18 L4 18 Z"/></svg>
         </div>
-        <div class="shape-btn" data-shape="fiveAngles" onclick="selectShape('fiveAngles')">
-            <svg viewBox="0 0 24 24"><path d="M4 6 L20 6 L20 18 L10 18 L4 12 Z"/></svg>
+        <div class="shape-btn" data-shape="rhombus" onclick="selectShape('rhombus')">
+            <svg viewBox="0 0 24 24"><path d="M12 2 L22 12 L12 22 L2 12 Z"/></svg>
         </div>
     </div>
 
-    <!-- Предпросмотр -->
     <div class="preview-box" id="previewBox">
         Введите размеры стекла
     </div>
 
-    <!-- Поля ввода -->
     <div class="inputs-container" id="inputsContainer">
         <!-- Поля будут генерироваться через JS -->
     </div>
 
-    <!-- Результаты -->
     <div class="results-card" id="resultsCard">
         <div class="results-header">
             <div class="results-title">Размеры рамки</div>
@@ -162,7 +154,6 @@
         <div class="hint">* Для запила в стык (угол/2) используйте половину указанного угла.</div>
     </div>
 
-    <!-- Модалка настроек -->
     <div class="modal-overlay" id="settingsModal">
         <div class="modal">
             <h2>Настройки калькулятора</h2>
@@ -186,11 +177,9 @@
         tg.expand();
         tg.ready();
 
-        // Настройки
         let settings = { falz: 10.0, pila: 22.0 };
         let currentShape = 'trapezoid';
 
-        // Загрузка настроек
         function loadSettings() {
             try {
                 const saved = localStorage.getItem('glassSettings');
@@ -214,7 +203,6 @@
         function openSettings() { document.getElementById('settingsModal').classList.add('active'); }
         function closeSettings() { document.getElementById('settingsModal').classList.remove('active'); }
 
-        // Переключение фигур
         function selectShape(shape) {
             currentShape = shape;
             document.querySelectorAll('.shape-btn').forEach(b => b.classList.remove('active'));
@@ -223,206 +211,301 @@
             calculate();
         }
 
-        // Генерация полей ввода
         function renderInputs() {
             const container = document.getElementById('inputsContainer');
             container.innerHTML = '';
 
             if (currentShape === 'trapezoid') {
                 container.innerHTML = `
-                    <div class="input-group">
-                        <label>Нижнее основание (мм)</label>
-                        <input type="number" id="inp1" oninput="calculate()">
-                    </div>
-                    <div class="input-group">
-                        <label>Верхнее основание (мм)</label>
-                        <input type="number" id="inp2" oninput="calculate()">
-                    </div>
-                    <div class="input-group">
-                        <label>Высота (мм)</label>
-                        <input type="number" id="inp3" oninput="calculate()">
-                    </div>
+                    <div class="input-group"><label>Нижнее основание (мм)</label><input type="number" id="inp1" oninput="calculate()"></div>
+                    <div class="input-group"><label>Верхнее основание (мм)</label><input type="number" id="inp2" oninput="calculate()"></div>
+                    <div class="input-group"><label>Высота (мм)</label><input type="number" id="inp3" oninput="calculate()"></div>
                 `;
             } else if (currentShape === 'triangle') {
                 container.innerHTML = `
-                    <div class="input-group">
-                        <label>Низ (основание) (мм)</label>
-                        <input type="number" id="inp1" oninput="calculate()">
-                    </div>
-                    <div class="input-group">
-                        <label>Медиана (высота) (мм)</label>
-                        <input type="number" id="inp2" oninput="calculate()">
-                    </div>
+                    <div class="input-group"><label>Низ (основание) (мм)</label><input type="number" id="inp1" oninput="calculate()"></div>
+                    <div class="input-group"><label>Медиана (высота) (мм)</label><input type="number" id="inp2" oninput="calculate()"></div>
                 `;
             } else if (currentShape === 'rightTriangle') {
                 container.innerHTML = `
-                    <div class="input-group">
-                        <label>Горизонтальный катет (мм)</label>
-                        <input type="number" id="inp1" oninput="calculate()">
-                    </div>
-                    <div class="input-group">
-                        <label>Вертикальный катет (мм)</label>
-                        <input type="number" id="inp2" oninput="calculate()">
-                    </div>
+                    <div class="input-group"><label>Горизонтальный катет (мм)</label><input type="number" id="inp1" oninput="calculate()"></div>
+                    <div class="input-group"><label>Вертикальный катет (мм)</label><input type="number" id="inp2" oninput="calculate()"></div>
                 `;
             } else if (currentShape === 'oneSlant') {
                 container.innerHTML = `
-                    <div class="input-group">
-                        <label>Низ (мм)</label>
-                        <input type="number" id="inp1" oninput="calculate()">
-                    </div>
+                    <div class="input-group"><label>Низ (мм)</label><input type="number" id="inp1" oninput="calculate()"></div>
                     <div class="input-row">
-                        <div class="input-group">
-                            <label>Левая высота</label>
-                            <input type="number" id="inp2" oninput="calculate()">
-                        </div>
-                        <div class="input-group">
-                            <label>Правая высота</label>
-                            <input type="number" id="inp3" oninput="calculate()">
-                        </div>
+                        <div class="input-group"><label>Левая высота</label><input type="number" id="inp2" oninput="calculate()"></div>
+                        <div class="input-group"><label>Правая высота</label><input type="number" id="inp3" oninput="calculate()"></div>
                     </div>
                 `;
-            } else if (currentShape === 'fiveAngles') {
+            } else if (currentShape === 'rhombus') {
                 container.innerHTML = `
-                    <div class="input-group">
-                        <label>Низ (мм)</label>
-                        <input type="number" id="inp1" oninput="calculate()">
-                    </div>
-                    <div class="input-row">
-                        <div class="input-group">
-                            <label>Правая высота</label>
-                            <input type="number" id="inp2" oninput="calculate()">
-                        </div>
-                        <div class="input-group">
-                            <label>Левая высота</label>
-                            <input type="number" id="inp3" oninput="calculate()">
-                        </div>
-                    </div>
-                    <div class="input-group">
-                        <label>Верх (мм)</label>
-                        <input type="number" id="inp4" oninput="calculate()">
-                    </div>
+                    <div class="input-group"><label>Диагональ А (горизонтальная) (мм)</label><input type="number" id="inp1" oninput="calculate()"></div>
+                    <div class="input-group"><label>Диагональ В (вертикальная) (мм)</label><input type="number" id="inp2" oninput="calculate()"></div>
                 `;
             }
         }
 
-        // Логика расчёта
+        const r = (num) => Math.round(num * 10) / 10;
+
         function calculate() {
             const falz = settings.falz;
             const pila = settings.pila;
-            const totalOffset = pila - falz; // 22 - 10 = 12 (прибавляется к внутреннему размеру)
+            const v = (id) => parseFloat(document.getElementById(id)?.value);
 
             let results = [];
             let valid = false;
+            let svgContent = '';
+            let subText = `Фальц ${falz.toFixed(1)} мм + запил ${pila.toFixed(1)} мм`;
 
-            const v = (id) => parseFloat(document.getElementById(id)?.value);
+            const drawPath = (d, pts, angles) => {
+                let svg = `<svg viewBox="0 0 300 240">
+                    <path d="${d}" fill="none" stroke="#888" stroke-width="4" stroke-linejoin="round"/>`;
+                if (pts) pts.forEach(p => {
+                    if(p.val) svg += `<text x="${p.x}" y="${p.y}" class="svg-text" text-anchor="middle" ${p.rot ? `transform="rotate(${p.rot} ${p.x} ${p.y})"` : ''}>${p.val}</text>`;
+                });
+                if (angles) angles.forEach(a => {
+                    if(a.val) svg += `<text x="${a.x}" y="${a.y}" class="svg-angle" text-anchor="middle">${a.val}</text>`;
+                });
+                svg += `</svg>`;
+                return svg;
+            };
 
             if (currentShape === 'trapezoid') {
                 const b = v('inp1'), t = v('inp2'), h = v('inp3');
                 if (b && t && h) {
                     valid = true;
+                    const frameBottom = b - 2*falz + 2*pila;
+                    const frameTop = t - 2*falz + 2*pila;
+                    
                     const diff = (b - t) / 2;
                     const slant = Math.sqrt(diff*diff + h*h);
-                    const angleRad = Math.atan2(h, diff);
-                    const angleDeg = 180 - (angleRad * 180 / Math.PI); // Угол при основании
-                    
+                    const frameSlant = slant - 2*falz + 2*pila;
+
+                    const angleRad = Math.atan(diff / h);
+                    const angleCut = 90 - (angleRad * 180 / Math.PI);
+                    const angleBase = 180 - angleCut;
+
                     results = [
-                        { label: 'Низ', val: b + totalOffset, angle: 90 },
-                        { label: 'Правая боковая', val: slant + totalOffset, angle: 90 - (angleDeg - 90) },
-                        { label: 'Верх', val: t + totalOffset, angle: 90 },
-                        { label: 'Левая боковая', val: slant + totalOffset, angle: 90 - (angleDeg - 90) }
+                        { label: 'Низ', val: frameBottom, angle: 90 },
+                        { label: 'Правая боковая', val: frameSlant, angle: angleCut },
+                        { label: 'Верх', val: frameTop, angle: 90 },
+                        { label: 'Левая боковая', val: frameSlant, angle: angleCut }
                     ];
+
+                    const scale = Math.min(180/b, 160/h, 2);
+                    const w = b * scale, wTop = t * scale, hh = h * scale;
+                    const cx = 150, cy = 120;
+                    const x1 = cx - w/2, x2 = cx + w/2;
+                    const y1 = cy + hh/2, y2 = cy - hh/2;
+                    const xt1 = cx - wTop/2, xt2 = cx + wTop/2;
+                    
+                    svgContent = drawPath(`M ${x1} ${y1} L ${x2} ${y1} L ${xt2} ${y2} L ${xt1} ${y2} Z`, 
+                        [
+                            {val: r(b), x: cx, y: y1 + 20},
+                            {val: r(t), x: cx, y: y2 - 10},
+                            {val: r(slant), x: x1 - 20, y: cy, rot: -90},
+                            {val: r(slant), x: x2 + 20, y: cy, rot: 90}
+                        ],
+                        [
+                            {val: r(angleBase) + '°', x: x1 + 20, y: y1 - 5},
+                            {val: r(angleBase) + '°', x: x2 - 20, y: y1 - 5},
+                            {val: r(angleCut) + '°', x: xt1 + 15, y: y2 + 15},
+                            {val: r(angleCut) + '°', x: xt2 - 15, y: y2 + 15}
+                        ]
+                    );
                 }
             } else if (currentShape === 'triangle') {
                 const b = v('inp1'), h = v('inp2');
                 if (b && h) {
                     valid = true;
+                    const frameBottom = b - 2*falz + 2*pila;
+                    
                     const half = b / 2;
                     const side = Math.sqrt(half*half + h*h);
-                    const angleRad = Math.atan2(h, half);
-                    const angleDeg = angleRad * 180 / Math.PI;
-                    
+                    const frameSide = side - 2*falz + 2*pila;
+
+                    const angleRad = Math.atan(half / h);
+                    const angleCut = 90 - (angleRad * 180 / Math.PI);
+                    const angleBase = 180 - angleCut;
+
                     results = [
-                        { label: 'Низ (основание)', val: b + totalOffset, angle: 90 },
-                        { label: 'Правая сторона', val: side + totalOffset, angle: angleDeg },
-                        { label: 'Левая сторона', val: side + totalOffset, angle: angleDeg }
+                        { label: 'Низ (основание)', val: frameBottom, angle: 90 },
+                        { label: 'Правая сторона', val: frameSide, angle: angleCut },
+                        { label: 'Левая сторона', val: frameSide, angle: angleCut }
                     ];
+
+                    const scale = Math.min(180/b, 160/h, 2);
+                    const w = b * scale, hh = h * scale;
+                    const cx = 150, cy = 140;
+                    const x1 = cx - w/2, x2 = cx + w/2, y1 = cy + hh/2, y2 = cy - hh/2;
+
+                    svgContent = drawPath(`M ${x1} ${y1} L ${x2} ${y1} L ${cx} ${y2} Z`,
+                        [
+                            {val: r(b), x: cx, y: y1 + 20},
+                            {val: r(side), x: cx - w/4 - 20, y: cy, rot: -angleBase},
+                            {val: r(side), x: cx + w/4 + 20, y: cy, rot: angleBase}
+                        ],
+                        [
+                            {val: r(angleBase)+'°', x: x1 + 20, y: y1 - 5},
+                            {val: r(angleBase)+'°', x: x2 - 20, y: y1 - 5},
+                            {val: r(180-2*angleBase)+'°', x: cx, y: y2 + 15}
+                        ]
+                    );
                 }
             } else if (currentShape === 'rightTriangle') {
                 const a = v('inp1'), b = v('inp2');
                 if (a && b) {
                     valid = true;
-                    const c = Math.sqrt(a*a + b*b);
-                    const angleA = Math.atan2(b, a) * 180 / Math.PI;
-                    const angleB = 90 - angleA;
+                    const frameA = a - 2*falz + 2*pila;
+                    const frameB = b - 2*falz + 2*pila;
                     
+                    const c = Math.sqrt(a*a + b*b);
+                    const frameC = c - 2*falz + 2*pila;
+
+                    const angleRad = Math.atan(a / b);
+                    const angleCut = 90 - (angleRad * 180 / Math.PI);
+                    const angleBase = 180 - angleCut;
+
                     results = [
-                        { label: 'Катет A', val: a + totalOffset, angle: 90 },
-                        { label: 'Гипотенуза', val: c + totalOffset, angle: angleA },
-                        { label: 'Катет B', val: b + totalOffset, angle: 90 }
+                        { label: 'Катет A (низ)', val: frameA, angle: 90 },
+                        { label: 'Гипотенуза', val: frameC, angle: angleCut },
+                        { label: 'Катет B (бок)', val: frameB, angle: 90 }
                     ];
+
+                    const scale = Math.min(150/a, 160/b, 2);
+                    const w = a * scale, hh = b * scale;
+                    const cx = 150, cy = 130;
+                    const x1 = cx - w/2, x2 = cx + w/2, y1 = cy + hh/2, y2 = cy - hh/2;
+
+                    svgContent = drawPath(`M ${x1} ${y1} L ${x2} ${y1} L ${x1} ${y2} Z`,
+                        [
+                            {val: r(a), x: cx, y: y1 + 20},
+                            {val: r(c), x: cx - w/4 + 10, y: cy, rot: -angleBase},
+                            {val: r(b), x: x1 - 20, y: cy, rot: -90}
+                        ],
+                        [
+                            {val: '45,0°', x: x1 + 20, y: y1 - 5},
+                            {val: r(angleBase)+'°', x: x2 - 20, y: y1 - 5},
+                            {val: r(angleCut)+'°', x: x1 + 15, y: y2 + 15}
+                        ]
+                    );
                 }
             } else if (currentShape === 'oneSlant') {
-                const bottom = v('inp1'), leftH = v('inp2'), rightH = v('inp3');
-                if (bottom && leftH && rightH) {
+                const b = v('inp1'), leftH = v('inp2'), rightH = v('inp3');
+                if (b && leftH && rightH) {
                     valid = true;
+                    const frameBottom = b - 2*falz + 2*pila;
+                    const frameLeft = leftH - 2*falz + 2*pila;
+                    const frameRight = rightH - 2*falz + 2*pila;
+                    
                     const diff = Math.abs(leftH - rightH);
-                    const top = Math.sqrt(bottom*bottom + diff*diff);
-                    const angleDeg = Math.atan2(diff, bottom) * 180 / Math.PI;
-                    
+                    const top = Math.sqrt(b*b + diff*diff);
+                    const frameTop = top - 2*falz + 2*pila;
+
+                    const angleRad = Math.atan(diff / b);
+                    const angleCut = 90 - (angleRad * 180 / Math.PI);
+
                     results = [
-                        { label: 'Низ', val: bottom + totalOffset, angle: 90 },
-                        { label: 'Правая', val: rightH + totalOffset, angle: 90 },
-                        { label: 'Верхняя (наклон)', val: top + totalOffset, angle: angleDeg },
-                        { label: 'Левая', val: leftH + totalOffset, angle: 90 }
+                        { label: 'Низ', val: frameBottom, angle: 90 },
+                        { label: 'Правая', val: frameRight, angle: 90 },
+                        { label: 'Верхняя (наклон)', val: frameTop, angle: angleCut },
+                        { label: 'Левая', val: frameLeft, angle: 90 }
                     ];
+
+                    const scale = Math.min(160/b, 140/Math.max(leftH, rightH), 2);
+                    const w = b * scale, h1 = leftH * scale, h2 = rightH * scale;
+                    const cx = 150, cy = 120;
+                    const x1 = cx - w/2, x2 = cx + w/2;
+                    const y1 = cy + Math.max(h1,h2)/2, y2 = y1 - h1, y3 = y1 - h2;
+
+                    svgContent = drawPath(`M ${x1} ${y1} L ${x2} ${y1} L ${x2} ${y3} L ${x1} ${y2} Z`,
+                        [
+                            {val: r(b), x: cx, y: y1 + 20},
+                            {val: r(top), x: cx - 20, y: y2 + (y3-y2)/2, rot: -angleCut},
+                            {val: r(rightH), x: x2 + 20, y: cy, rot: 90},
+                            {val: r(leftH), x: x1 - 20, y: cy, rot: -90}
+                        ],
+                        [
+                            {val: '45,0°', x: x1 + 20, y: y1 - 5},
+                            {val: '45,0°', x: x2 - 20, y: y1 - 5},
+                            {val: r(angleCut)+'°', x: x1 + 15, y: y2 + 15},
+                            {val: r(angleCut)+'°', x: x2 - 15, y: y3 + 15}
+                        ]
+                    );
                 }
-            } else if (currentShape === 'fiveAngles') {
-                const bottom = v('inp1'), rightH = v('inp2'), leftH = v('inp3'), top = v('inp4');
-                if (bottom && rightH && leftH && top) {
+            } else if (currentShape === 'rhombus') {
+                const a = v('inp1'), b = v('inp2');
+                if (a && b) {
                     valid = true;
-                    // Тут сложная геометрия для пятиугольника, упрощаю:
-                    const diff = Math.abs(rightH - leftH);
-                    const side = Math.sqrt(top*top + diff*diff); // Примерно
-                    const angleDeg = Math.atan2(diff, top) * 180 / Math.PI;
+                    const frameA = a - 2*falz + 2*pila;
+                    const frameB = b - 2*falz + 2*pila;
                     
+                    const side = Math.sqrt((a/2)**2 + (b/2)**2);
+                    const frameSide = side - 2*falz + 2*pila;
+
+                    const angleRad = Math.atan(b / a);
+                    const angleCut = 90 - (angleRad * 180 / Math.PI);
+
                     results = [
-                        { label: 'Низ', val: bottom + totalOffset, angle: 90 },
-                        { label: 'Правая', val: rightH + totalOffset, angle: 90 },
-                        { label: 'Верх', val: top + totalOffset, angle: 90 },
-                        { label: 'Верхняя (наклон)', val: side + totalOffset, angle: angleDeg },
-                        { label: 'Левая', val: leftH + totalOffset, angle: 90 }
+                        { label: 'Все стороны (4 шт)', val: frameSide, angle: angleCut }
                     ];
+
+                    const scale = Math.min(180/a, 160/b, 2);
+                    const w = a * scale, hh = b * scale;
+                    const cx = 150, cy = 120;
+                    const x1 = cx, x2 = cx - w/2, x3 = cx, x4 = cx + w/2;
+                    const y1 = cy - hh/2, y2 = cy, y3 = cy + hh/2, y4 = cy;
+
+                    svgContent = drawPath(`M ${x1} ${y1} L ${x4} ${y4} L ${x3} ${y3} L ${x2} ${y2} Z`,
+                        [
+                            {val: r(side), x: cx - w/4 - 15, y: cy - hh/4 - 10, rot: -angleCut},
+                            {val: r(side), x: cx + w/4 + 15, y: cy - hh/4 - 10, rot: angleCut},
+                            {val: r(side), x: cx - w/4 - 15, y: cy + hh/4 + 10, rot: angleCut},
+                            {val: r(side), x: cx + w/4 + 15, y: cy + hh/4 + 10, rot: -angleCut}
+                        ],
+                        [
+                            {val: r(angleCut)+'°', x: x2 + 15, y: cy},
+                            {val: r(angleCut)+'°', x: x4 - 15, y: cy},
+                            {val: r(angleCut)+'°', x: cx, y: y1 + 15},
+                            {val: r(angleCut)+'°', x: cx, y: y3 - 15}
+                        ]
+                    );
                 }
             }
 
-            renderResults(results, valid);
+            renderResults(results, valid, svgContent, subText);
         }
 
-        function renderResults(results, valid) {
+        function renderResults(results, valid, svgContent, subText) {
+            const previewBox = document.getElementById('previewBox');
             const card = document.getElementById('resultsCard');
             const sub = document.getElementById('resultsSub');
             const list = document.getElementById('resultsList');
 
             if (!valid) {
+                previewBox.innerHTML = 'Введите размеры стекла';
                 card.classList.remove('active');
                 return;
             }
 
+            if (svgContent) previewBox.innerHTML = svgContent;
+            
             card.classList.add('active');
-            sub.innerText = `Фальц ${settings.falz.toFixed(1)} мм + запил ${settings.pila.toFixed(1)} мм`;
+            sub.innerText = subText;
             
             list.innerHTML = '';
-            results.forEach(r => {
-                const angleText = r.angle < 90 ? `Угол: ${r.angle.toFixed(1)}°` : 'Угол: 90,0°';
+            results.forEach(res => {
+                const angleText = res.angle < 90 ? `Угол: ${res.angle.toFixed(1)}°` : 'Угол: 90,0°';
                 list.innerHTML += `
                     <div class="result-item">
                         <div>
-                            <div class="result-label">${r.label}</div>
+                            <div class="result-label">${res.label}</div>
                         </div>
                         <div style="text-align: right;">
-                            <div class="result-value">${r.val.toFixed(1)} мм</div>
-                            ${r.angle ? `<div class="result-angle">${angleText}</div>` : ''}
+                            <div class="result-value">${res.val.toFixed(1)} мм</div>
+                            ${res.angle ? `<div class="result-angle">${angleText}</div>` : ''}
                         </div>
                     </div>
                 `;
@@ -430,11 +513,9 @@
         }
 
         function showToast(msg) {
-            // Простая заглушка вместо тоста, чтобы не перегружать код
             alert(msg);
         }
 
-        // Инициализация
         loadSettings();
         renderInputs();
     </script>
