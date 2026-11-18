@@ -126,18 +126,26 @@
                 const alpha = r2d(Math.atan(b / a)); 
                 const beta = 90 - alpha;
 
-                // --- ПРАВИЛЬНАЯ ФОРМУЛА СМЕЩЕНИЯ ВНУТРЬ НА falz ---
-                // При смещении линии внутрь на 10 мм, длина катета меняется на:
-                // 1) срез под 45 градусов на одном конце (falz)
-                // 2) срез под углом гипотенузы на другом конце
-                const frameA = a - falz - falz / Math.sin(alpha * Math.PI / 180);
-                const frameB = b - falz - falz / Math.cos(alpha * Math.PI / 180);
-                const frameC = Math.sqrt(a*a + b*b) - falz / Math.sin(alpha * Math.PI / 180) - falz / Math.cos(alpha * Math.PI / 180);
+                // Чистая геометрия: линии смещаются на 10 мм внутрь
+                // Для катета А (низ): отступ слева (45°) и справа (угол beta)
+                const shiftA_left = falz / Math.tan(45 * Math.PI / 180);
+                const shiftA_right = falz / Math.tan(beta * Math.PI / 180);
+                const frameA_raw = a - shiftA_left - shiftA_right;
+
+                // Для катета B (бок): отступ снизу (45°) и сверху (угол alpha)
+                const shiftB_bottom = falz / Math.tan(45 * Math.PI / 180);
+                const shiftB_top = falz / Math.tan(alpha * Math.PI / 180);
+                const frameB_raw = b - shiftB_bottom - shiftB_top;
+
+                // Для гипотенузы: отступ с двух сторон (углы alpha и beta)
+                const shiftC_1 = falz / Math.sin(alpha * Math.PI / 180);
+                const shiftC_2 = falz / Math.sin(beta * Math.PI / 180);
+                const frameC_raw = Math.sqrt(a*a + b*b) - shiftC_1 - shiftC_2;
 
                 results = [
-                    { label: 'Катет A (низ)', val: frameA + pila, angle: 45 },
-                    { label: 'Гипотенуза', val: frameC + pila, angle: alpha },
-                    { label: 'Катет B (бок)', val: frameB + pila, angle: 90 }
+                    { label: 'Катет A (низ)', val: frameA_raw + pila, angle: 45 },
+                    { label: 'Гипотенуза', val: frameC_raw + pila, angle: alpha },
+                    { label: 'Катет B (бок)', val: frameB_raw + pila, angle: 90 }
                 ];
 
                 // Отрисовка
@@ -149,9 +157,9 @@
                 document.getElementById('previewBox').innerHTML = `
                     <svg viewBox="0 0 300 240">
                         <path d="M ${x1} ${y1} L ${x2} ${y1} L ${x1} ${y2} Z" fill="none" stroke="#888" stroke-width="4"/>
-                        <text x="${cx}" y="${y1 - 8}" fill="#22c55e" font-size="13" text-anchor="middle">Р:${r(frameA+pila)}</text>
-                        <text x="${cx - w/4}" y="${cy + 15}" fill="#22c55e" font-size="13" text-anchor="middle" transform="rotate(${-alpha} ${cx - w/4} ${cy + 15})">Р:${r(frameC+pila)}</text>
-                        <text x="${x1 + 20}" y="${cy}" fill="#22c55e" font-size="13" text-anchor="middle" transform="rotate(-90 ${x1 + 20} ${cy})">Р:${r(frameB+pila)}</text>
+                        <text x="${cx}" y="${y1 - 8}" fill="#22c55e" font-size="13" text-anchor="middle">Р:${r(frameA_raw+pila)}</text>
+                        <text x="${cx - w/4}" y="${cy + 15}" fill="#22c55e" font-size="13" text-anchor="middle" transform="rotate(${-alpha} ${cx - w/4} ${cy + 15})">Р:${r(frameC_raw+pila)}</text>
+                        <text x="${x1 + 20}" y="${cy}" fill="#22c55e" font-size="13" text-anchor="middle" transform="rotate(-90 ${x1 + 20} ${cy})">Р:${r(frameB_raw+pila)}</text>
                     </svg>
                 `;
             }
