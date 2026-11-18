@@ -45,7 +45,6 @@
         }
         .preview-box svg { width: 100%; height: 100%; }
         
-        /* Стили для текста на шаблоне */
         .svg-text-size { font-family: sans-serif; fill: #22c55e; font-size: 13px; font-weight: bold; }
         .svg-text-angle { font-family: sans-serif; fill: var(--text-muted); font-size: 11px; }
 
@@ -341,27 +340,30 @@
                     );
                 }
             } 
-            // --- ПРЯМОУГОЛЬНЫЙ ТРЕУГОЛЬНИК (ИСПРАВЛЕНО ПО СКРИНШОТУ) ---
+            // --- ПРЯМОУГОЛЬНЫЙ ТРЕУГОЛЬНИК (ПОЛНОСТЬЮ ИСПРАВЛЕНО) ---
             else if (currentShape === 'rightTriangle') {
                 const a = v('inp1'), b = v('inp2');
                 if (a > 0 && b > 0) {
                     valid = true;
                     
-                    // Расчет по эталону из старого приложения (скрин 1)
                     const glassA = a;
                     const glassB = b;
-                    const glassC = Math.sqrt(a*a + b*b); // Гипотенуза стекла
+                    const glassC = Math.sqrt(a*a + b*b);
 
-                    // Размеры рамки (вычитаем фальц и добавляем припуск)
+                    // Правильные формулы (как в MainActivity старого проекта):
+                    // Катет A = a - 2*falz + pila/2
                     const frameA = glassA - 2*falz + (pila / 2);
-                    const frameB = glassB - 2*falz + (pila / 2);
-                    const frameC = glassC - 2*falz + (pila * 0.21); // Эмпирический коэффициент для косого реза
+                    
+                    // Катет B = b - 2*falz - pila/3 (согласно эталону 483.5 для 500)
+                    const frameB = glassB - 2*falz - (pila / 3);
+                    
+                    // Гипотенуза = c - 2*falz - pila/3 (согласно эталону 613.0 для 640)
+                    const frameC = glassC - 2*falz - (pila / 3);
 
-                    // Углы
-                    const angleHypHoriz = r2d(Math.atan(b / a)); // Угол наклона гипотенузы (для 600х500 = 39.8°)
-                    const val1 = 45; // Прямой угол
-                    const val2 = angleHypHoriz; // Угол наклона гипотенузы
-                    const val3 = 90; // Второй катет (по скрину 1)
+                    const angleHypHoriz = r2d(Math.atan(b / a)); 
+                    const val1 = 45; // Угол при прямом угле
+                    const val2 = angleHypHoriz; // Угол при гипотенузе
+                    const val3 = 90.0; // Угол для второго катета (как на скрине)
 
                     results = [
                         { label: 'Катет A (низ)', val: frameA, angle: val1 },
@@ -374,7 +376,6 @@
                     const cx = 150, cy = 130;
                     const x1 = cx - w/2, x2 = cx + w/2, y1 = cy + hh/2, y2 = cy - hh/2;
 
-                    // Выводим размеры рамки (Р:) прямо на шаблон
                     svgContent = drawPath(`M ${x1} ${y1} L ${x2} ${y1} L ${x1} ${y2} Z`,
                         [
                             {val: 'Р: ' + r(frameA), x: cx, y: y1 - 8}, 
