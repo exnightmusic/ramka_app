@@ -41,25 +41,68 @@
         .shape-btn.active { background: rgba(14,165,233,0.12); border-color: var(--accent); color: var(--accent); box-shadow: 0 0 10px rgba(14,165,233,0.25); }
         .shape-btn svg { width: 32px; height: 32px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linejoin: round; }
 
+        /* ---------- Превью с полями на фигуре ---------- */
         .preview-box {
             background: var(--card-bg); border: 1px solid var(--border-color);
-            border-radius: 16px; height: 340px; display: flex; align-items: center; justify-content: center;
-            margin-bottom: 10px; position: relative; overflow: hidden;
+            border-radius: 16px; height: 380px; position: relative; overflow: hidden;
+            margin-bottom: 12px;
         }
-        .preview-box svg { width: 100%; height: 100%; }
-        .preview-hint {
-            position: absolute; bottom: 14px; left: 0; right: 0; text-align: center;
-            font-size: 13px; color: var(--text-muted); pointer-events: none;
+        .preview-box svg.silhouette {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            pointer-events: none;
         }
+        .preview-box svg.silhouette path {
+            fill: rgba(148, 163, 184, 0.06);
+            stroke: rgba(148, 163, 184, 0.55);
+            stroke-width: 2;
+            stroke-linejoin: round;
+            stroke-dasharray: 6 4;
+        }
+        .field-overlay {
+            position: absolute; transform: translate(-50%, -50%);
+            display: flex; flex-direction: column; align-items: center;
+            pointer-events: auto;
+        }
+        .field-overlay .field-label {
+            font-size: 10px; color: var(--text-muted); margin-bottom: 2px;
+            white-space: nowrap; font-weight: 600; letter-spacing: 0.3px;
+            background: var(--card-bg); padding: 0 4px; border-radius: 4px;
+        }
+        .field-overlay input {
+            width: 74px; height: 32px;
+            background: var(--bg-color);
+            border: 1.5px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 14px; font-weight: 700;
+            text-align: center;
+            padding: 0 6px;
+            outline: none;
+            font-family: inherit;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            -moz-appearance: textfield;
+        }
+        .field-overlay input::-webkit-outer-spin-button,
+        .field-overlay input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .field-overlay input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(14,165,233,0.15);
+        }
+        .field-overlay input.filled {
+            border-color: rgba(34,197,94,0.5);
+        }
+
         .preview-error {
-            padding: 20px; text-align: center; color: var(--danger);
+            position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+            padding: 24px; text-align: center; color: var(--danger);
             font-size: 13px; line-height: 1.5;
         }
 
+        /* ---------- Кнопки управления ---------- */
         .controls-row {
             display: flex; justify-content: space-around; align-items: center;
             background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px;
-            padding: 10px; margin-bottom: 20px;
+            padding: 10px; margin-bottom: 16px;
         }
         .ctrl-btn {
             background: none; border: none; color: var(--text-main); font-size: 12px;
@@ -74,27 +117,14 @@
         .svg-angle-badge { font-family: sans-serif; font-size: 9px; fill: var(--warning); font-weight: 600; }
         .svg-angle-circle { fill: rgba(245, 158, 11, 0.18); stroke: rgba(245, 158, 11, 0.55); stroke-width: 1; }
 
-        .inputs-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-        .input-row { display: flex; gap: 10px; }
-        .input-group { flex: 1; position: relative; }
-        .input-group label {
-            position: absolute; top: -8px; left: 10px; background: var(--bg-color);
-            padding: 0 4px; font-size: 12px; color: var(--text-muted);
-        }
-        .input-group input {
-            width: 100%; background: transparent; border: 1px solid var(--border-color);
-            color: var(--text-main); padding: 12px; border-radius: 8px; font-size: 16px;
-            outline: none; font-family: inherit; transition: border-color 0.2s;
-        }
-        .input-group input:focus { border-color: var(--accent); }
-
+        /* ---------- Результаты ---------- */
         .results-card {
             background: var(--card-bg); border: 1px solid var(--border-color);
-            border-radius: 16px; padding: 20px; display: none;
+            border-radius: 16px; padding: 18px; display: none;
         }
         .results-card.active { display: block; }
-        .results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 10px; }
-        .results-title { font-size: 16px; font-weight: bold; color: var(--text-muted); }
+        .results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; gap: 10px; }
+        .results-title { font-size: 15px; font-weight: bold; color: var(--text-muted); }
         .results-actions { display: flex; gap: 8px; }
         .results-save {
             font-size: 13px; color: var(--success); cursor: pointer; background: none; border: none;
@@ -103,18 +133,9 @@
         .results-save.alt { color: var(--accent); }
         .results-save:active { background: rgba(128,128,128,0.15); }
 
-        .results-summary {
-            background: rgba(14,165,233,0.08); border: 1px solid rgba(14,165,233,0.25);
-            border-radius: 12px; padding: 12px 14px; margin-bottom: 14px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .results-summary .label { font-size: 12px; color: var(--text-muted); }
-        .results-summary .value { font-size: 18px; font-weight: 800; color: var(--accent); }
-        .results-summary .sides { font-size: 11px; color: var(--text-muted); text-align: right; }
+        .results-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; }
 
-        .results-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 15px; }
-
-        .result-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(128,128,128,0.1); gap: 10px; }
+        .result-item { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid rgba(128,128,128,0.1); gap: 10px; }
         .result-item:last-child { border-bottom: none; padding-bottom: 0; }
         .result-item .side-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
         .result-item .side-label { display: flex; align-items: center; gap: 8px; flex: 1; }
@@ -122,13 +143,23 @@
         .result-value { font-size: 16px; font-weight: bold; text-align: right; color: var(--text-main); }
         .result-angle { font-size: 11px; color: var(--warning); margin-top: 3px; }
 
-        .hint { font-size: 12px; color: var(--text-muted); margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(128,128,128,0.1); line-height: 1.4; }
-
+        /* ---------- Модалка ---------- */
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
         .modal-overlay.active { display: flex; }
         .modal { background: var(--card-bg); border: 1px solid rgba(128,128,128,0.1); width: 100%; max-width: 340px; border-radius: 20px; padding: 20px; }
         .modal h2 { margin: 0 0 20px 0; font-size: 18px; }
-        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+        .modal .input-group { position: relative; margin-bottom: 18px; }
+        .modal .input-group label {
+            position: absolute; top: -8px; left: 10px; background: var(--card-bg);
+            padding: 0 4px; font-size: 12px; color: var(--text-muted);
+        }
+        .modal .input-group input {
+            width: 100%; background: transparent; border: 1px solid var(--border-color);
+            color: var(--text-main); padding: 12px; border-radius: 8px; font-size: 16px;
+            outline: none; font-family: inherit;
+        }
+        .modal .input-group input:focus { border-color: var(--accent); }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 4px; }
         .btn-text { background: none; border: none; color: var(--text-muted); font-size: 14px; cursor: pointer; padding: 8px 12px; }
         .btn-save { background: var(--gradient); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
     </style>
@@ -185,8 +216,6 @@
         </button>
     </div>
 
-    <div class="inputs-container" id="inputsContainer"></div>
-
     <div class="results-card" id="resultsCard">
         <div class="results-header">
             <div class="results-title">Размеры рамки</div>
@@ -195,26 +224,18 @@
                 <button class="results-save alt" onclick="shareResults()">Поделиться</button>
             </div>
         </div>
-        <div class="results-summary" id="resultsSummary" style="display:none">
-            <div>
-                <div class="label">Суммарная длина</div>
-                <div class="value" id="sumTotal">0 мм</div>
-            </div>
-            <div class="sides" id="sumSides">0 сторон</div>
-        </div>
         <div class="results-sub" id="resultsSub"></div>
         <div id="resultsList"></div>
-        <div class="hint">* Для запила в стык (угол/2) используйте половину указанного угла. Углы показаны жёлтым маркером на превью.</div>
     </div>
 
     <div class="modal-overlay" id="settingsModal">
         <div class="modal">
             <h2>Настройки калькулятора</h2>
-            <div class="input-group" style="margin-bottom: 15px;">
+            <div class="input-group">
                 <label>Фальц (отступ от края), мм</label>
                 <input type="number" id="inputFalz" value="10.0" step="0.1" oninput="calculate()">
             </div>
-            <div class="input-group" style="margin-bottom: 15px;">
+            <div class="input-group">
                 <label>Отступ пилы (добавка), мм</label>
                 <input type="number" id="inputPila" value="22.0" step="0.1" oninput="calculate()">
             </div>
@@ -244,6 +265,152 @@
 
         const SIDE_COLORS = ['#22c55e', '#0ea5e9', '#a855f7', '#f59e0b', '#ef4444', '#14b8a6'];
 
+        // ============================================================
+        //  КОНФИГУРАЦИЯ ФИГУР
+        //  Для каждой фигуры:
+        //    - inputs: список полей (id, label, позиция x/y на "шаблоне" 0..1)
+        //    - outlineTemplate: силуэт (path в SVG, viewBox 300x340) для шаблона
+        //    - build: функция построения полигона из введённых значений
+        // ============================================================
+
+        const SHAPES = {
+            trapezoid: {
+                labels: ['Низ', 'Правая', 'Верх', 'Левая'],
+                fields: [
+                    { id: 'inp1', label: 'Низ',    x: 0.50, y: 0.93 },
+                    { id: 'inp2', label: 'Верх',   x: 0.50, y: 0.10 },
+                    { id: 'inp3', label: 'Высота', x: 0.90, y: 0.50 }
+                ],
+                template: 'M60 80 L240 80 L210 270 L90 270 Z',
+                build(v) {
+                    const b = v('inp1'), t = v('inp2'), h = v('inp3');
+                    if (!(b > 0 && t > 0 && h > 0)) return null;
+                    const diff = (b - t) / 2;
+                    return {
+                        poly: [{x:0,y:0},{x:b,y:0},{x:b-diff,y:h},{x:diff,y:h}],
+                        labels: this.labels
+                    };
+                }
+            },
+            triangle: {
+                labels: ['Низ', 'Правая', 'Левая'],
+                fields: [
+                    { id: 'inp1', label: 'Низ',    x: 0.50, y: 0.93 },
+                    { id: 'inp2', label: 'Высота', x: 0.90, y: 0.50 }
+                ],
+                template: 'M150 70 L250 270 L50 270 Z',
+                build(v) {
+                    const b = v('inp1'), h = v('inp2');
+                    if (!(b > 0 && h > 0)) return null;
+                    return {
+                        poly: [{x:0,y:0},{x:b,y:0},{x:b/2,y:h}],
+                        labels: this.labels
+                    };
+                }
+            },
+            rightTriangle: {
+                labels: ['Катет A', 'Катет B', 'Гипотенуза'],
+                fields: [
+                    { id: 'inp1', label: 'Низ', x: 0.50, y: 0.93 },
+                    { id: 'inp2', label: 'Бок', x: 0.10, y: 0.50 }
+                ],
+                template: 'M70 70 L70 270 L250 270 Z',
+                build(v) {
+                    const a = v('inp1'), b = v('inp2');
+                    if (!(a > 0 && b > 0)) return null;
+                    return {
+                        poly: [{x:0,y:0},{x:a,y:0},{x:0,y:b}],
+                        labels: this.labels
+                    };
+                }
+            },
+            oneSlant: {
+                labels: ['Низ', 'Правая', 'Верхняя (наклон)', 'Левая'],
+                fields: [
+                    { id: 'inp1', label: 'Низ',        x: 0.50, y: 0.93 },
+                    { id: 'inp2', label: 'Левая выс.', x: 0.10, y: 0.35 },
+                    { id: 'inp3', label: 'Правая выс.', x: 0.90, y: 0.50 }
+                ],
+                template: 'M70 100 L230 100 L250 270 L70 270 Z',
+                build(v) {
+                    const b = v('inp1'), lh = v('inp2'), rh = v('inp3');
+                    if (!(b > 0 && lh > 0 && rh > 0)) return null;
+                    return {
+                        poly: [{x:0,y:0},{x:b,y:0},{x:b,y:rh},{x:0,y:lh}],
+                        labels: this.labels
+                    };
+                }
+            },
+            rhombus: {
+                labels: ['Сторона 1', 'Сторона 2', 'Сторона 3', 'Сторона 4'],
+                fields: [
+                    { id: 'inp1', label: 'Диаг. А', x: 0.90, y: 0.50 },
+                    { id: 'inp2', label: 'Диаг. В', x: 0.50, y: 0.07 }
+                ],
+                template: 'M150 50 L260 170 L150 290 L40 170 Z',
+                build(v) {
+                    const a = v('inp1'), b = v('inp2');
+                    if (!(a > 0 && b > 0)) return null;
+                    return {
+                        poly: [{x:a/2,y:0},{x:a,y:b/2},{x:a/2,y:b},{x:0,y:b/2}],
+                        labels: this.labels
+                    };
+                }
+            },
+            pentagon: {
+                labels: ['Низ', 'Правая', 'Верх', 'Скос', 'Левая'],
+                fields: [
+                    { id: 'inp1', label: 'Низ',        x: 0.50, y: 0.93 },
+                    { id: 'inp2', label: 'Верх',       x: 0.50, y: 0.10 },
+                    { id: 'inp3', label: 'Левая выс.', x: 0.08, y: 0.50 },
+                    { id: 'inp4', label: 'Правая выс.',x: 0.92, y: 0.50 },
+                    { id: 'inp5', label: 'Скос',       x: 0.75, y: 0.18 }
+                ],
+                template: 'M80 90 L220 90 L250 270 L50 270 Z',
+                build(v) {
+                    const bot = v('inp1'), top = v('inp2'), lh = v('inp3'), rh = v('inp4'), shift = v('inp5');
+                    if (!(bot > 0 && top > 0 && lh > 0 && rh > 0)) return null;
+                    const offset = (bot - top - shift) / 2;
+                    return {
+                        poly: [
+                            {x: 0, y: 0},
+                            {x: bot, y: 0},
+                            {x: bot, y: rh},
+                            {x: shift + offset, y: lh},
+                            {x: offset, y: lh}
+                        ],
+                        labels: this.labels
+                    };
+                }
+            },
+            rectCut: {
+                labels: ['Низ', 'Правая (до среза)', 'Срез', 'Верх', 'Левая'],
+                fields: [
+                    { id: 'inp1', label: 'Низ',          x: 0.45, y: 0.93 },
+                    { id: 'inp2', label: 'Левая стор.',  x: 0.08, y: 0.50 },
+                    { id: 'inp3', label: 'Правая стор.', x: 0.92, y: 0.62 },
+                    { id: 'inp4', label: 'Верх',         x: 0.38, y: 0.10 }
+                ],
+                template: 'M70 70 L190 70 L250 130 L250 270 L70 270 Z',
+                build(v) {
+                    const bot = v('inp1'), leftH = v('inp2'), rightH = v('inp3'), top = v('inp4');
+                    if (!(bot > 0 && leftH > 0 && rightH > 0 && top > 0)) return null;
+                    if (top > bot) return { error: `Верх (${top}) не может быть больше низа (${bot}).` };
+                    if (rightH >= leftH) return { error: `Правая сторона (${rightH}) должна быть меньше левой (${leftH}).` };
+                    return {
+                        poly: [
+                            {x: 0, y: 0},
+                            {x: bot, y: 0},
+                            {x: bot, y: rightH},
+                            {x: top, y: leftH},
+                            {x: 0, y: leftH}
+                        ],
+                        labels: this.labels
+                    };
+                }
+            }
+        };
+
         // ---------- Настройки ----------
         function loadSettings() {
             try {
@@ -253,7 +420,6 @@
             document.getElementById('inputFalz').value = settings.falz;
             document.getElementById('inputPila').value = settings.pila;
         }
-
         function saveSettings() {
             settings.falz = parseFloat(document.getElementById('inputFalz').value) || 10.0;
             settings.pila = parseFloat(document.getElementById('inputPila').value) || 22.0;
@@ -262,24 +428,22 @@
             closeSettings();
             calculate();
         }
-
         function openSettings() { document.getElementById('settingsModal').classList.add('active'); }
         function closeSettings() { document.getElementById('settingsModal').classList.remove('active'); }
 
         // ---------- Сохранение состояния ----------
         function persistState() {
             const data = { shape: currentShape, rotation, mirror, inputs: {} };
-            document.querySelectorAll('.input-group input[id^="inp"]').forEach(inp => {
+            document.querySelectorAll('.field-overlay input').forEach(inp => {
                 data.inputs[inp.id] = inp.value;
             });
             try { localStorage.setItem('glassLastCalc', JSON.stringify(data)); } catch(e) {}
         }
-
         function restoreState() {
             try {
                 const last = JSON.parse(localStorage.getItem('glassLastCalc') || 'null');
                 if (!last) return false;
-                if (last.shape) {
+                if (last.shape && SHAPES[last.shape]) {
                     currentShape = last.shape;
                     rotation = last.rotation || 0;
                     mirror = !!last.mirror;
@@ -289,7 +453,6 @@
                 return true;
             } catch(e) { return false; }
         }
-
         function restoreInputs() {
             try {
                 const last = JSON.parse(localStorage.getItem('glassLastCalc') || 'null');
@@ -308,75 +471,46 @@
             mirror = false;
             document.querySelectorAll('.shape-btn').forEach(b => b.classList.remove('active'));
             document.querySelector(`[data-shape="${shape}"]`).classList.add('active');
-            renderInputs();
-            calculate();
+            renderShape();
         }
-
         function rotateShape(deg) { rotation = (rotation + deg + 360) % 360; calculate(); }
         function mirrorShape() { mirror = !mirror; calculate(); }
         function resetShape() {
             rotation = 0;
             mirror = false;
-            document.querySelectorAll('.input-group input[id^="inp"]').forEach(inp => inp.value = '');
+            document.querySelectorAll('.field-overlay input').forEach(inp => inp.value = '');
             calculate();
         }
 
-        // ---------- Рендер полей ----------
-        function renderInputs() {
-            const container = document.getElementById('inputsContainer');
-            container.innerHTML = '';
-            if (currentShape === 'trapezoid') {
-                container.innerHTML = `
-                    <div class="input-group"><label>Нижнее основание (мм)</label><input type="number" id="inp1" oninput="calculate()"></div>
-                    <div class="input-group"><label>Верхнее основание (мм)</label><input type="number" id="inp2" oninput="calculate()"></div>
-                    <div class="input-group"><label>Высота (мм)</label><input type="number" id="inp3" oninput="calculate()"></div>
-                `;
-            } else if (currentShape === 'triangle') {
-                container.innerHTML = `
-                    <div class="input-group"><label>Низ (основание) (мм)</label><input type="number" id="inp1" oninput="calculate()"></div>
-                    <div class="input-group"><label>Высота (мм)</label><input type="number" id="inp2" oninput="calculate()"></div>
-                `;
-            } else if (currentShape === 'rightTriangle') {
-                container.innerHTML = `
-                    <div class="input-group"><label>Горизонтальный катет (мм)</label><input type="number" id="inp1" oninput="calculate()"></div>
-                    <div class="input-group"><label>Вертикальный катет (мм)</label><input type="number" id="inp2" oninput="calculate()"></div>
-                `;
-            } else if (currentShape === 'oneSlant') {
-                container.innerHTML = `
-                    <div class="input-group"><label>Низ (мм)</label><input type="number" id="inp1" oninput="calculate()"></div>
-                    <div class="input-row">
-                        <div class="input-group"><label>Левая высота</label><input type="number" id="inp2" oninput="calculate()"></div>
-                        <div class="input-group"><label>Правая высота</label><input type="number" id="inp3" oninput="calculate()"></div>
-                    </div>
-                `;
-            } else if (currentShape === 'rhombus') {
-                container.innerHTML = `
-                    <div class="input-group"><label>Диагональ А (горизонтальная) (мм)</label><input type="number" id="inp1" oninput="calculate()"></div>
-                    <div class="input-group"><label>Диагональ В (вертикальная) (мм)</label><input type="number" id="inp2" oninput="calculate()"></div>
-                `;
-            } else if (currentShape === 'pentagon') {
-                container.innerHTML = `
-                    <div class="input-group"><label>Низ (мм)</label><input type="number" id="inp1" oninput="calculate()"></div>
-                    <div class="input-group"><label>Верх (мм)</label><input type="number" id="inp2" oninput="calculate()"></div>
-                    <div class="input-row">
-                        <div class="input-group"><label>Левая высота</label><input type="number" id="inp3" oninput="calculate()"></div>
-                        <div class="input-group"><label>Правая высота</label><input type="number" id="inp4" oninput="calculate()"></div>
-                    </div>
-                    <div class="input-group"><label>Скос (сдвиг верха вправо, мм)</label><input type="number" id="inp5" oninput="calculate()"></div>
-                `;
-            } else if (currentShape === 'rectCut') {
-                container.innerHTML = `
-                    <div class="input-group"><label>Низ (мм)</label><input type="number" id="inp1" oninput="calculate()"></div>
-                    <div class="input-row">
-                        <div class="input-group"><label>Левая сторона (мм)</label><input type="number" id="inp2" oninput="calculate()"></div>
-                        <div class="input-group"><label>Правая сторона (мм)</label><input type="number" id="inp3" oninput="calculate()"></div>
-                    </div>
-                    <div class="input-group"><label>Верх (мм)</label><input type="number" id="inp4" oninput="calculate()"></div>
-                `;
-            }
+        // ============================================================
+        //  РЕНДЕР ПРЕВЬЮ: шаблон + поля ввода поверх
+        // ============================================================
+        function renderShape() {
+            const box = document.getElementById('previewBox');
+            const cfg = SHAPES[currentShape];
+            if (!cfg) { box.innerHTML = ''; return; }
+
+            let html = `<svg class="silhouette" viewBox="0 0 300 340" preserveAspectRatio="xMidYMid meet">
+                <path d="${cfg.template}"/>
+            </svg>`;
+
+            cfg.fields.forEach(f => {
+                html += `<div class="field-overlay" style="left:${f.x*100}%; top:${f.y*100}%">
+                    <div class="field-label">${f.label}</div>
+                    <input type="number" id="${f.id}" inputmode="decimal" placeholder="мм" oninput="calculate()">
+                </div>`;
+            });
+
+            box.innerHTML = html;
+
+            // Восстанавливаем значения полей
+            restoreInputs();
+            calculate();
         }
 
-        // ---------- Геометрия ----------
+        // ============================================================
+        //  ГЕОМЕТРИЯ
+        // ============================================================
         const r = (num) => Math.round(num * 10) / 10;
 
         function lineIntersection(p1, p2, p3, p4) {
@@ -445,258 +579,181 @@
             return p;
         }
 
-        // ---------- Плейсхолдер ----------
-        function renderEmptyPreview() {
-            const previewBox = document.getElementById('previewBox');
-            const shapes = {
-                trapezoid: 'M4 6 L20 6 L16 18 L8 18 Z',
-                triangle: 'M12 4 L20 20 L4 20 Z',
-                rightTriangle: 'M4 4 L4 20 L20 20 Z',
-                oneSlant: 'M4 6 L16 6 L20 18 L4 18 Z',
-                rhombus: 'M12 2 L22 12 L12 22 L2 12 Z',
-                pentagon: 'M4 10 L12 4 L20 10 L20 20 L4 20 Z',
-                rectCut: 'M4 4 L14 4 L20 10 L20 20 L4 20 Z'
-            };
-            const path = shapes[currentShape] || shapes.trapezoid;
-            previewBox.innerHTML = `
-                <svg viewBox="0 0 300 340" style="opacity:.22">
-                    <path d="${path}" fill="none" stroke="currentColor" stroke-width="1.5"
-                          transform="translate(60,60) scale(7)"/>
-                </svg>
-                <div class="preview-hint">Введите размеры стекла</div>`;
-        }
-
-        // ---------- Расчёт ----------
+        // ============================================================
+        //  РАСЧЁТ
+        // ============================================================
         function calculate() {
             const falz = settings.falz;
             const pila = settings.pila;
             const v = (id) => parseFloat(document.getElementById(id)?.value);
+            const cfg = SHAPES[currentShape];
 
-            let results = [];
-            let valid = false;
-            let svgContent = '';
-            const subText = `Фальц: ${falz.toFixed(1)} мм + добавка: ${pila.toFixed(1)} мм`;
-
-            let rawPoly = null;
-            let labels = [];
-            let geomError = null;
-
-            if (currentShape === 'trapezoid') {
-                const b = v('inp1'), t = v('inp2'), h = v('inp3');
-                if (b > 0 && t > 0 && h > 0) {
-                    const diff = (b - t) / 2;
-                    rawPoly = [{x: 0, y: 0}, {x: b, y: 0}, {x: b - diff, y: h}, {x: diff, y: h}];
-                    labels = ['Низ', 'Правая', 'Верх', 'Левая'];
-                    valid = true;
-                }
-            } else if (currentShape === 'triangle') {
-                const b = v('inp1'), h = v('inp2');
-                if (b > 0 && h > 0) {
-                    rawPoly = [{x: 0, y: 0}, {x: b, y: 0}, {x: b/2, y: h}];
-                    labels = ['Низ', 'Правая', 'Левая'];
-                    valid = true;
-                }
-            } else if (currentShape === 'rightTriangle') {
-                const a = v('inp1'), b = v('inp2');
-                if (a > 0 && b > 0) {
-                    rawPoly = [{x: 0, y: 0}, {x: a, y: 0}, {x: 0, y: b}];
-                    labels = ['Катет A (низ)', 'Катет B (бок)', 'Гипотенуза'];
-                    valid = true;
-                }
-            } else if (currentShape === 'oneSlant') {
-                const b = v('inp1'), leftH = v('inp2'), rightH = v('inp3');
-                if (b > 0 && leftH > 0 && rightH > 0) {
-                    rawPoly = [{x: 0, y: 0}, {x: b, y: 0}, {x: b, y: rightH}, {x: 0, y: leftH}];
-                    labels = ['Низ', 'Правая', 'Верхняя (наклон)', 'Левая'];
-                    valid = true;
-                }
-            } else if (currentShape === 'rhombus') {
-                const a = v('inp1'), b = v('inp2');
-                if (a > 0 && b > 0) {
-                    rawPoly = [{x: a/2, y: 0}, {x: a, y: b/2}, {x: a/2, y: b}, {x: 0, y: b/2}];
-                    labels = ['Сторона 1', 'Сторона 2', 'Сторона 3', 'Сторона 4'];
-                    valid = true;
-                }
-            } else if (currentShape === 'pentagon') {
-                const bot = v('inp1'), top = v('inp2'), lh = v('inp3'), rh = v('inp4'), shift = v('inp5');
-                if (bot > 0 && top > 0 && lh > 0 && rh > 0) {
-                    const offset = (bot - top - shift) / 2;
-                    rawPoly = [
-                        {x: 0, y: 0},
-                        {x: bot, y: 0},
-                        {x: bot, y: rh},
-                        {x: shift + offset, y: lh},
-                        {x: offset, y: lh}
-                    ];
-                    labels = ['Низ', 'Правая', 'Верх', 'Скос', 'Левая'];
-                    valid = true;
-                }
-            } else if (currentShape === 'rectCut') {
-                // 5-тиугольник с 3 прямыми углами (срез в правом верхнем углу)
-                // Пользователь: низ, лево, право, верх
-                // Прямые углы: лево-низ (0,0), право-низ (bot,0), лево-верх (0, leftH)
-                // Срез: от (top, leftH) до (bot, rightH)
-                // Валидация: top <= bot (верх не может быть шире низа)
-                const bot = v('inp1'), leftH = v('inp2'), rightH = v('inp3'), top = v('inp4');
-                if (bot > 0 && leftH > 0 && rightH > 0 && top > 0) {
-                    if (top > bot) {
-                        geomError = `Верх (${top}) не может быть больше низа (${bot}).`;
-                    } else if (rightH >= leftH) {
-                        geomError = `Правая сторона (${rightH}) должна быть меньше левой (${leftH}) — иначе срез не образуется.`;
-                    } else {
-                        rawPoly = [
-                            {x: 0, y: 0},
-                            {x: bot, y: 0},
-                            {x: bot, y: rightH},
-                            {x: top, y: leftH},
-                            {x: 0, y: leftH}
-                        ];
-                        labels = ['Низ', 'Правая (до среза)', 'Срез', 'Верх', 'Левая'];
-                        valid = true;
-                    }
-                }
+            // Подсветка заполненных полей
+            if (cfg) {
+                cfg.fields.forEach(f => {
+                    const el = document.getElementById(f.id);
+                    if (el) el.classList.toggle('filled', !!el.value);
+                });
             }
 
-            if (geomError) {
-                document.getElementById('previewBox').innerHTML =
-                    `<div class="preview-error">⚠️ ${geomError}</div>`;
-                document.getElementById('resultsCard').classList.remove('active');
+            const subText = `Фальц: ${falz.toFixed(1)} мм + добавка: ${pila.toFixed(1)} мм`;
+            const built = cfg ? cfg.build(v) : null;
+
+            if (!built) {
+                // не все поля заполнены — показываем шаблон
+                renderResults([], false, '', subText);
                 persistState();
                 return;
             }
 
-            if (valid && rawPoly) {
-                const innerPoly = offsetPolygon(rawPoly, falz);
-                if (!innerPoly) {
-                    document.getElementById('previewBox').innerHTML =
-                        `<div class="preview-error">⚠️ Ошибка геометрии — слишком большой фальц или некорректные размеры.</div>`;
-                    document.getElementById('resultsCard').classList.remove('active');
-                    persistState();
-                    return;
-                }
-
-                const transformedInner = transformPoly(innerPoly);
-                const transformedOuter = transformPoly(rawPoly);
-
-                const N = innerPoly.length;
-                for (let i = 0; i < N; i++) {
-                    const p1 = innerPoly[i], p2 = innerPoly[(i + 1) % N];
-                    const len = Math.sqrt((p2.x - p1.x)**2 + (p2.y - p1.y)**2);
-
-                    const p_prev = innerPoly[(i - 1 + N) % N];
-                    const p_next = innerPoly[(i + 2) % N];
-                    const v1 = {x: p1.x - p_prev.x, y: p1.y - p_prev.y};
-                    const v2 = {x: p2.x - p1.x, y: p2.y - p1.y};
-                    const a1 = Math.atan2(v1.y, v1.x);
-                    const a2 = Math.atan2(v2.y, v2.x);
-                    let diff = (a1 - a2) * 180 / Math.PI;
-                    if (diff < 0) diff += 360;
-                    if (diff > 180) diff = 360 - diff;
-
-                    results.push({
-                        label: labels[i] || `Сторона ${i+1}`,
-                        val: len + pila,
-                        angle: Math.abs(180 - diff) / 2,
-                        color: SIDE_COLORS[i % SIDE_COLORS.length]
-                    });
-                }
-
-                // ---- Отрисовка с корректным вписыванием по обеим осям ----
-                const VB_W = 300, VB_H = 340;
-                const allPts = [...transformedOuter, ...transformedInner];
-                const minX = Math.min(...allPts.map(p => p.x));
-                const maxX = Math.max(...allPts.map(p => p.x));
-                const minY = Math.min(...allPts.map(p => p.y));
-                const maxY = Math.max(...allPts.map(p => p.y));
-
-                const wBox = Math.max(maxX - minX, 1);
-                const hBox = Math.max(maxY - minY, 1);
-                // Оставляем ~22% на каждую сторону под подписи
-                const usableW = VB_W * 0.72;
-                const usableH = VB_H * 0.72;
-                const scale = Math.min(usableW / wBox, usableH / hBox);
-
-                const cx = VB_W / 2 - ((minX + maxX) / 2) * scale;
-                const cy = VB_H / 2 + ((minY + maxY) / 2) * scale;
-                const toSvg = (p) => ({ x: p.x * scale + cx, y: -p.y * scale + cy });
-
-                const maxSide = Math.max(wBox, hBox);
-                const labelOffset = Math.max(16, Math.min(38, 220 / maxSide * 22));
-
-                let pathStr = "";
-                transformedOuter.forEach((p, i) => {
-                    const pt = toSvg(p);
-                    pathStr += (i === 0 ? "M" : "L") + ` ${pt.x} ${pt.y} `;
-                });
-                pathStr += "Z";
-
-                let svg = `<svg viewBox="0 0 ${VB_W} ${VB_H}">
-                    <path d="${pathStr}" fill="none" stroke="#888" stroke-width="3" stroke-linejoin="round"/>`;
-
-                // Угловые бейджи
-                for (let i = 0; i < N; i++) {
-                    const pt = toSvg(transformedInner[i]);
-                    const dx = VB_W / 2 - pt.x, dy = VB_H / 2 - pt.y;
-                    const dd = Math.sqrt(dx*dx + dy*dy) || 1;
-                    const bx = pt.x + (dx / dd) * 14;
-                    const by = pt.y + (dy / dd) * 14;
-                    if (results[i].angle > 1) {
-                        svg += `<circle cx="${bx}" cy="${by}" r="9" class="svg-angle-circle"/>
-                                <text x="${bx}" y="${by + 3}" text-anchor="middle" class="svg-angle-badge">${Math.round(results[i].angle)}°</text>`;
-                    }
-                }
-
-                // Подписи сторон
-                for (let i = 0; i < N; i++) {
-                    const p1 = toSvg(transformedInner[i]);
-                    const p2 = toSvg(transformedInner[(i + 1) % N]);
-                    const midX = (p1.x + p2.x) / 2;
-                    const midY = (p1.y + p2.y) / 2;
-
-                    const outX = midX - VB_W / 2, outY = midY - VB_H / 2;
-                    const d = Math.sqrt(outX*outX + outY*outY) || 1;
-                    const textX = midX + (outX / d) * labelOffset;
-                    const textY = midY + (outY / d) * labelOffset;
-
-                    let angleDeg = Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI;
-                    if (angleDeg > 90) angleDeg -= 180;
-                    if (angleDeg < -90) angleDeg += 180;
-
-                    svg += `<text x="${textX}" y="${textY}" text-anchor="middle"
-                              transform="rotate(${angleDeg} ${textX} ${textY})"
-                              class="svg-text-size" fill="${results[i].color}">${r(results[i].val)}</text>`;
-                }
-                svg += `</svg>`;
-                svgContent = svg;
+            if (built.error) {
+                showPreviewError(built.error);
+                renderResults([], false, '', subText);
+                persistState();
+                return;
             }
 
-            renderResults(results, valid, svgContent, subText);
+            const rawPoly = built.poly;
+            const labels = built.labels;
+
+            const innerPoly = offsetPolygon(rawPoly, falz);
+            if (!innerPoly) {
+                showPreviewError('Ошибка геометрии — слишком большой фальц или некорректные размеры.');
+                renderResults([], false, '', subText);
+                persistState();
+                return;
+            }
+
+            const transformedInner = transformPoly(innerPoly);
+            const transformedOuter = transformPoly(rawPoly);
+
+            // Считаем длины и углы
+            const results = [];
+            const N = innerPoly.length;
+            for (let i = 0; i < N; i++) {
+                const p1 = innerPoly[i], p2 = innerPoly[(i + 1) % N];
+                const len = Math.sqrt((p2.x - p1.x)**2 + (p2.y - p1.y)**2);
+
+                const p_prev = innerPoly[(i - 1 + N) % N];
+                const p_next = innerPoly[(i + 2) % N];
+                const v1 = {x: p1.x - p_prev.x, y: p1.y - p_prev.y};
+                const v2 = {x: p2.x - p1.x, y: p2.y - p1.y};
+                const a1 = Math.atan2(v1.y, v1.x);
+                const a2 = Math.atan2(v2.y, v2.x);
+                let diff = (a1 - a2) * 180 / Math.PI;
+                if (diff < 0) diff += 360;
+                if (diff > 180) diff = 360 - diff;
+
+                results.push({
+                    label: labels[i] || `Сторона ${i+1}`,
+                    val: len + pila,
+                    angle: Math.abs(180 - diff) / 2,
+                    color: SIDE_COLORS[i % SIDE_COLORS.length]
+                });
+            }
+
+            // Отрисовка результата поверх шаблона — фигура заменяет силуэт
+            const svgContent = buildResultSvg(transformedOuter, transformedInner, results, N);
+            renderResults(results, true, svgContent, subText);
             persistState();
         }
 
-        // ---------- Рендер результатов ----------
+        function showPreviewError(text) {
+            const box = document.getElementById('previewBox');
+            const existing = box.querySelector('.preview-error');
+            if (existing) existing.remove();
+            const div = document.createElement('div');
+            div.className = 'preview-error';
+            div.innerText = '⚠️ ' + text;
+            box.appendChild(div);
+        }
+
+        function buildResultSvg(outer, inner, results, N) {
+            const VB_W = 300, VB_H = 340;
+            const allPts = [...outer, ...inner];
+            const minX = Math.min(...allPts.map(p => p.x));
+            const maxX = Math.max(...allPts.map(p => p.x));
+            const minY = Math.min(...allPts.map(p => p.y));
+            const maxY = Math.max(...allPts.map(p => p.y));
+
+            const wBox = Math.max(maxX - minX, 1);
+            const hBox = Math.max(maxY - minY, 1);
+            const usableW = VB_W * 0.72;
+            const usableH = VB_H * 0.72;
+            const scale = Math.min(usableW / wBox, usableH / hBox);
+
+            const cx = VB_W / 2 - ((minX + maxX) / 2) * scale;
+            const cy = VB_H / 2 + ((minY + maxY) / 2) * scale;
+            const toSvg = (p) => ({ x: p.x * scale + cx, y: -p.y * scale + cy });
+
+            const maxSide = Math.max(wBox, hBox);
+            const labelOffset = Math.max(16, Math.min(38, 220 / maxSide * 22));
+
+            let pathStr = "";
+            outer.forEach((p, i) => {
+                const pt = toSvg(p);
+                pathStr += (i === 0 ? "M" : "L") + ` ${pt.x} ${pt.y} `;
+            });
+            pathStr += "Z";
+
+            let svg = `<svg class="silhouette" viewBox="0 0 ${VB_W} ${VB_H}" style="opacity:1">
+                <path d="${pathStr}" style="fill:none;stroke:#888;stroke-width:3;stroke-dasharray:none"/>`;
+
+            // Углы
+            for (let i = 0; i < N; i++) {
+                const pt = toSvg(inner[i]);
+                const dx = VB_W / 2 - pt.x, dy = VB_H / 2 - pt.y;
+                const dd = Math.sqrt(dx*dx + dy*dy) || 1;
+                const bx = pt.x + (dx / dd) * 14;
+                const by = pt.y + (dy / dd) * 14;
+                if (results[i].angle > 1) {
+                    svg += `<circle cx="${bx}" cy="${by}" r="9" class="svg-angle-circle"/>
+                            <text x="${bx}" y="${by + 3}" text-anchor="middle" class="svg-angle-badge">${Math.round(results[i].angle)}°</text>`;
+                }
+            }
+
+            // Подписи размеров
+            for (let i = 0; i < N; i++) {
+                const p1 = toSvg(inner[i]);
+                const p2 = toSvg(inner[(i + 1) % N]);
+                const midX = (p1.x + p2.x) / 2;
+                const midY = (p1.y + p2.y) / 2;
+
+                const outX = midX - VB_W / 2, outY = midY - VB_H / 2;
+                const d = Math.sqrt(outX*outX + outY*outY) || 1;
+                const textX = midX + (outX / d) * labelOffset;
+                const textY = midY + (outY / d) * labelOffset;
+
+                let angleDeg = Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI;
+                if (angleDeg > 90) angleDeg -= 180;
+                if (angleDeg < -90) angleDeg += 180;
+
+                svg += `<text x="${textX}" y="${textY}" text-anchor="middle"
+                          transform="rotate(${angleDeg} ${textX} ${textY})"
+                          class="svg-text-size" fill="${results[i].color}">${r(results[i].val)}</text>`;
+            }
+            svg += `</svg>`;
+            return svg;
+        }
+
         function renderResults(results, valid, svgContent, subText) {
-            const previewBox = document.getElementById('previewBox');
+            const box = document.getElementById('previewBox');
             const card = document.getElementById('resultsCard');
             const sub = document.getElementById('resultsSub');
             const list = document.getElementById('resultsList');
-            const summary = document.getElementById('resultsSummary');
 
             if (!valid) {
-                if (!document.querySelector('.preview-error')) renderEmptyPreview();
                 card.classList.remove('active');
                 return;
             }
 
-            if (svgContent) previewBox.innerHTML = svgContent;
+            // Заменяем силуэт на реальную фигуру
+            const oldSil = box.querySelector('svg.silhouette');
+            if (oldSil) oldSil.remove();
+            if (svgContent) box.insertAdjacentHTML('afterbegin', svgContent);
 
             card.classList.add('active');
             sub.innerText = subText;
-
-            const total = results.reduce((s, r) => s + r.val, 0);
-            document.getElementById('sumTotal').innerText = total.toFixed(1) + ' мм';
-            document.getElementById('sumSides').innerText = results.length + ' сторон';
-            summary.style.display = 'flex';
 
             list.innerHTML = '';
             results.forEach(res => {
@@ -729,7 +786,6 @@
                 alert('Не удалось скопировать');
             }
         }
-
         function shareResults() {
             const sub = document.getElementById('resultsSub').innerText;
             const list = document.getElementById('resultsList').innerText;
@@ -750,13 +806,9 @@
         window.onload = () => {
             loadSettings();
             const restored = restoreState();
-            renderInputs();
-            if (restored) {
-                restoreInputs();
-                calculate();
-            } else {
-                renderEmptyPreview();
-            }
+            renderShape();
+            if (restored) restoreInputs();
+            calculate();
         };
     </script>
 </body>
