@@ -10,10 +10,13 @@
             --bg-color: var(--tg-theme-bg-color, #1a1a1a);
             --card-bg: var(--tg-theme-secondary-bg-color, #2a2a2a);
             --text-main: var(--tg-theme-text-color, #ffffff);
-            --text-muted: var(--tg-theme-hint-color, #888888);
-            --border-color: #444444;
+            --text-muted: var(--tg-theme-hint-color, #9ca3af);
+            --border-color: rgba(148, 163, 184, 0.25);
             --accent: var(--tg-theme-link-color, #0ea5e9);
+            --accent-2: #a855f7;
             --gradient: linear-gradient(135deg, #0ea5e9, #a855f7);
+            --success: #22c55e;
+            --warning: #f59e0b;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
@@ -26,7 +29,7 @@
 
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 5px; }
         .header h1 { font-size: 20px; font-weight: 800; margin: 0; }
-        .settings-btn { background: none; border: none; color: var(--text-main); font-size: 22px; cursor: pointer; }
+        .settings-btn { background: none; border: none; color: var(--text-main); font-size: 22px; cursor: pointer; padding: 4px 8px; }
 
         .shapes-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; scrollbar-width: none; }
         .shapes-scroll::-webkit-scrollbar { display: none; }
@@ -35,7 +38,7 @@
             border-radius: 12px; display: flex; align-items: center; justify-content: center;
             cursor: pointer; transition: all 0.2s; color: var(--text-muted);
         }
-        .shape-btn.active { background: rgba(14,165,233,0.1); border-color: var(--accent); color: var(--accent); box-shadow: 0 0 10px rgba(14,165,233,0.2); }
+        .shape-btn.active { background: rgba(14,165,233,0.12); border-color: var(--accent); color: var(--accent); box-shadow: 0 0 10px rgba(14,165,233,0.25); }
         .shape-btn svg { width: 32px; height: 32px; stroke: currentColor; fill: none; stroke-width: 2; }
 
         .preview-box {
@@ -44,20 +47,28 @@
             margin-bottom: 10px; position: relative; overflow: hidden;
         }
         .preview-box svg { width: 100%; height: 100%; }
-        
+        .preview-hint {
+            position: absolute; bottom: 14px; left: 0; right: 0; text-align: center;
+            font-size: 13px; color: var(--text-muted); pointer-events: none;
+        }
+
         .controls-row {
             display: flex; justify-content: space-around; align-items: center;
             background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px;
             padding: 10px; margin-bottom: 20px;
         }
         .ctrl-btn {
-            background: none; border: none; color: var(--text-main); font-size: 18px;
+            background: none; border: none; color: var(--text-main); font-size: 12px;
             cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px;
+            padding: 6px 8px; border-radius: 8px; transition: background 0.2s;
         }
+        .ctrl-btn:active { background: rgba(128,128,128,0.15); }
+        .ctrl-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
         .ctrl-btn span { font-size: 10px; color: var(--text-muted); }
-        
-        .svg-text-size { font-family: sans-serif; fill: #22c55e; font-size: 13px; font-weight: bold; }
-        .svg-text-angle { font-family: sans-serif; fill: var(--text-muted); font-size: 11px; }
+
+        .svg-text-size { font-family: sans-serif; fill: var(--success); font-size: 13px; font-weight: bold; }
+        .svg-angle-badge { font-family: sans-serif; font-size: 9px; fill: var(--warning); font-weight: 600; }
+        .svg-angle-circle { fill: rgba(245, 158, 11, 0.15); stroke: rgba(245, 158, 11, 0.5); stroke-width: 1; }
 
         .inputs-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
         .input-row { display: flex; gap: 10px; }
@@ -78,16 +89,36 @@
             border-radius: 16px; padding: 20px; display: none;
         }
         .results-card.active { display: block; }
-        .results-header { display: flex; justify-content: space-between; margin-bottom: 15px; }
+        .results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 10px; }
         .results-title { font-size: 16px; font-weight: bold; color: var(--text-muted); }
-        .results-save { font-size: 14px; color: #22c55e; cursor: pointer; background: none; border: none; }
+        .results-actions { display: flex; gap: 8px; }
+        .results-save {
+            font-size: 13px; color: var(--success); cursor: pointer; background: none; border: none;
+            padding: 4px 8px; border-radius: 6px;
+        }
+        .results-save.alt { color: var(--accent); }
+        .results-save:active { background: rgba(128,128,128,0.15); }
+
+        .results-summary {
+            background: rgba(14,165,233,0.08); border: 1px solid rgba(14,165,233,0.25);
+            border-radius: 12px; padding: 12px 14px; margin-bottom: 14px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .results-summary .label { font-size: 12px; color: var(--text-muted); }
+        .results-summary .value { font-size: 18px; font-weight: 800; color: var(--accent); }
+        .results-summary .sides { font-size: 11px; color: var(--text-muted); text-align: right; }
+
         .results-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 15px; }
 
-        .result-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(128,128,128,0.1); }
+        .result-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(128,128,128,0.1); gap: 10px; }
         .result-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .result-item .side-dot {
+            width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+        }
+        .result-item .side-label { display: flex; align-items: center; gap: 8px; flex: 1; }
         .result-label { font-size: 14px; color: var(--text-muted); }
         .result-value { font-size: 16px; font-weight: bold; text-align: right; color: var(--text-main); }
-        .result-angle { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+        .result-angle { font-size: 11px; color: var(--warning); margin-top: 3px; }
 
         .hint { font-size: 12px; color: var(--text-muted); margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(128,128,128,0.1); line-height: 1.4; }
 
@@ -96,7 +127,7 @@
         .modal { background: var(--card-bg); border: 1px solid rgba(128,128,128,0.1); width: 100%; max-width: 340px; border-radius: 20px; padding: 20px; }
         .modal h2 { margin: 0 0 20px 0; font-size: 18px; }
         .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-        .btn-text { background: none; border: none; color: var(--text-muted); font-size: 14px; cursor: pointer; }
+        .btn-text { background: none; border: none; color: var(--text-muted); font-size: 14px; cursor: pointer; padding: 8px 12px; }
         .btn-save { background: var(--gradient); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
@@ -126,27 +157,29 @@
         <div class="shape-btn" data-shape="pentagon" onclick="selectShape('pentagon')">
             <svg viewBox="0 0 24 24"><path d="M4 10 L12 4 L20 10 L20 20 L4 20 Z"/></svg>
         </div>
+        <!-- Новая фигура: 5-тиугольник с 3 прямыми углами (прямоугольник со срезом) -->
+        <div class="shape-btn" data-shape="rectCut" onclick="selectShape('rectCut')">
+            <svg viewBox="0 0 24 24"><path d="M4 4 L14 4 L20 10 L20 20 L4 20 Z"/></svg>
+        </div>
     </div>
 
-    <div class="preview-box" id="previewBox">
-        Введите размеры стекла
-    </div>
+    <div class="preview-box" id="previewBox"></div>
 
     <div class="controls-row">
-        <button class="ctrl-btn" onclick="rotateShape(-90)">
-            <span>↺</span>
+        <button class="ctrl-btn" onclick="rotateShape(-90)" title="Повернуть влево">
+            <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v4h4"/></svg>
             <span>Влево</span>
         </button>
-        <button class="ctrl-btn" onclick="rotateShape(90)">
-            <span>↻</span>
+        <button class="ctrl-btn" onclick="rotateShape(90)" title="Повернуть вправо">
+            <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v4h-4"/></svg>
             <span>Вправо</span>
         </button>
-        <button class="ctrl-btn" onclick="mirrorShape()">
-            <span>↔</span>
+        <button class="ctrl-btn" onclick="mirrorShape()" title="Отразить">
+            <svg viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M8 7L3 12l5 5"/><path d="M16 7l5 5-5 5"/></svg>
             <span>Зеркало</span>
         </button>
-        <button class="ctrl-btn" onclick="resetShape()">
-            <span>⟲</span>
+        <button class="ctrl-btn" onclick="resetShape()" title="Сбросить">
+            <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9"/><path d="M3 3v5h5"/></svg>
             <span>Сброс</span>
         </button>
     </div>
@@ -156,11 +189,21 @@
     <div class="results-card" id="resultsCard">
         <div class="results-header">
             <div class="results-title">Размеры рамки</div>
-            <button class="results-save" onclick="copyResults()">Сохранить</button>
+            <div class="results-actions">
+                <button class="results-save" onclick="copyResults()">Копировать</button>
+                <button class="results-save alt" onclick="shareResults()">Поделиться</button>
+            </div>
         </div>
-        <div class="results-sub" id="resultsSub">Фальц: 10.0 мм + добавка: 22.0 мм</div>
+        <div class="results-summary" id="resultsSummary" style="display:none">
+            <div>
+                <div class="label">Суммарная длина</div>
+                <div class="value" id="sumTotal">0 мм</div>
+            </div>
+            <div class="sides" id="sumSides">0 сторон</div>
+        </div>
+        <div class="results-sub" id="resultsSub"></div>
         <div id="resultsList"></div>
-        <div class="hint">* Для запила в стык (угол/2) используйте половину указанного угла.</div>
+        <div class="hint">* Для запила в стык (угол/2) используйте половину указанного угла. Углы показаны жёлтым маркером на превью.</div>
     </div>
 
     <div class="modal-overlay" id="settingsModal">
@@ -189,7 +232,7 @@
             document.documentElement.style.setProperty('--bg-color', tg.themeParams.bg_color || '#1a1a1a');
             document.documentElement.style.setProperty('--card-bg', tg.themeParams.secondary_bg_color || '#2a2a2a');
             document.documentElement.style.setProperty('--text-main', tg.themeParams.text_color || '#ffffff');
-            document.documentElement.style.setProperty('--text-muted', tg.themeParams.hint_color || '#888888');
+            document.documentElement.style.setProperty('--text-muted', tg.themeParams.hint_color || '#9ca3af');
             document.documentElement.style.setProperty('--accent', tg.themeParams.link_color || '#0ea5e9');
         }
 
@@ -198,6 +241,10 @@
         let rotation = 0;
         let mirror = false;
 
+        // Цвета для сторон (совпадают с точками в результатах)
+        const SIDE_COLORS = ['#22c55e', '#0ea5e9', '#a855f7', '#f59e0b', '#ef4444', '#14b8a6'];
+
+        // ---------- Настройки ----------
         function loadSettings() {
             try {
                 const saved = localStorage.getItem('glassSettings');
@@ -219,6 +266,42 @@
         function openSettings() { document.getElementById('settingsModal').classList.add('active'); }
         function closeSettings() { document.getElementById('settingsModal').classList.remove('active'); }
 
+        // ---------- Сохранение последнего расчёта ----------
+        function persistState() {
+            const data = { shape: currentShape, rotation, mirror, inputs: {} };
+            document.querySelectorAll('.input-group input[id^="inp"]').forEach(inp => {
+                data.inputs[inp.id] = inp.value;
+            });
+            try { localStorage.setItem('glassLastCalc', JSON.stringify(data)); } catch(e) {}
+        }
+
+        function restoreState() {
+            try {
+                const last = JSON.parse(localStorage.getItem('glassLastCalc') || 'null');
+                if (!last) return false;
+                if (last.shape) {
+                    currentShape = last.shape;
+                    rotation = last.rotation || 0;
+                    mirror = !!last.mirror;
+                    document.querySelectorAll('.shape-btn').forEach(b =>
+                        b.classList.toggle('active', b.dataset.shape === currentShape));
+                }
+                return true;
+            } catch(e) { return false; }
+        }
+
+        function restoreInputs() {
+            try {
+                const last = JSON.parse(localStorage.getItem('glassLastCalc') || 'null');
+                if (!last?.inputs) return;
+                Object.entries(last.inputs).forEach(([id, val]) => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = val;
+                });
+            } catch(e) {}
+        }
+
+        // ---------- Выбор фигуры ----------
         function selectShape(shape) {
             currentShape = shape;
             rotation = 0;
@@ -229,23 +312,16 @@
             calculate();
         }
 
-        function rotateShape(deg) {
-            rotation = (rotation + deg + 360) % 360;
-            calculate();
-        }
-
-        function mirrorShape() {
-            mirror = !mirror;
-            calculate();
-        }
-
+        function rotateShape(deg) { rotation = (rotation + deg + 360) % 360; calculate(); }
+        function mirrorShape() { mirror = !mirror; calculate(); }
         function resetShape() {
             rotation = 0;
             mirror = false;
-            document.querySelectorAll('.input-group input').forEach(inp => inp.value = '');
+            document.querySelectorAll('.input-group input[id^="inp"]').forEach(inp => inp.value = '');
             calculate();
         }
 
+        // ---------- Рендер полей ввода ----------
         function renderInputs() {
             const container = document.getElementById('inputsContainer');
             container.innerHTML = '';
@@ -288,19 +364,25 @@
                     </div>
                     <div class="input-group"><label>Скос (сдвиг верха вправо, мм)</label><input type="number" id="inp5" oninput="calculate()"></div>
                 `;
+            } else if (currentShape === 'rectCut') {
+                // 5-тиугольник с 3 прямыми углами (прямоугольник со срезом одного угла)
+                container.innerHTML = `
+                    <div class="input-group"><label>Низ (мм)</label><input type="number" id="inp1" oninput="calculate()"></div>
+                    <div class="input-row">
+                        <div class="input-group"><label>Левая сторона (мм)</label><input type="number" id="inp2" oninput="calculate()"></div>
+                        <div class="input-group"><label>Правая сторона (мм)</label><input type="number" id="inp3" oninput="calculate()"></div>
+                    </div>
+                    <div class="input-group"><label>Верх (мм)</label><input type="number" id="inp4" oninput="calculate()"></div>
+                `;
             }
         }
 
+        // ---------- Геометрия ----------
         const r = (num) => Math.round(num * 10) / 10;
-        const r2d = (rad) => rad * 180 / Math.PI;
 
         function lineIntersection(p1, p2, p3, p4) {
-            const a1 = p2.y - p1.y;
-            const b1 = p1.x - p2.x;
-            const c1 = a1 * p1.x + b1 * p1.y;
-            const a2 = p4.y - p3.y;
-            const b2 = p3.x - p4.x;
-            const c2 = a2 * p3.x + b2 * p3.y;
+            const a1 = p2.y - p1.y, b1 = p1.x - p2.x, c1 = a1 * p1.x + b1 * p1.y;
+            const a2 = p4.y - p3.y, b2 = p3.x - p4.x, c2 = a2 * p3.x + b2 * p3.y;
             const det = a1 * b2 - a2 * b1;
             if (Math.abs(det) < 1e-6) return null;
             return { x: (b2 * c1 - b1 * c2) / det, y: (a1 * c2 - a2 * c1) / det };
@@ -316,10 +398,8 @@
             const isCCW = area > 0;
             const shiftedLines = [];
             for (let i = 0; i < poly.length; i++) {
-                const p1 = poly[i];
-                const p2 = poly[(i + 1) % poly.length];
-                const dx = p2.x - p1.x;
-                const dy = p2.y - p1.y;
+                const p1 = poly[i], p2 = poly[(i + 1) % poly.length];
+                const dx = p2.x - p1.x, dy = p2.y - p1.y;
                 const len = Math.sqrt(dx * dx + dy * dy);
                 if (len === 0) return null;
                 const nx = isCCW ? dy / len : -dy / len;
@@ -366,6 +446,28 @@
             return p;
         }
 
+        // ---------- Плейсхолдер ----------
+        function renderEmptyPreview() {
+            const previewBox = document.getElementById('previewBox');
+            const shapes = {
+                trapezoid: 'M4 6 L20 6 L16 18 L8 18 Z',
+                triangle: 'M12 4 L20 20 L4 20 Z',
+                rightTriangle: 'M4 4 L4 20 L20 20 Z',
+                oneSlant: 'M4 6 L16 6 L20 18 L4 18 Z',
+                rhombus: 'M12 2 L22 12 L12 22 L2 12 Z',
+                pentagon: 'M4 10 L12 4 L20 10 L20 20 L4 20 Z',
+                rectCut: 'M4 4 L14 4 L20 10 L20 20 L4 20 Z'
+            };
+            const path = shapes[currentShape] || shapes.trapezoid;
+            previewBox.innerHTML = `
+                <svg viewBox="0 0 300 340" style="opacity:.22">
+                    <path d="${path}" fill="none" stroke="currentColor" stroke-width="1.5"
+                          transform="translate(60,60) scale(7)"/>
+                </svg>
+                <div class="preview-hint">Введите размеры стекла</div>`;
+        }
+
+        // ---------- Расчёт ----------
         function calculate() {
             const falz = settings.falz;
             const pila = settings.pila;
@@ -374,7 +476,7 @@
             let results = [];
             let valid = false;
             let svgContent = '';
-            let subText = `Фальц: ${falz.toFixed(1)} мм + добавка: ${pila.toFixed(1)} мм`;
+            const subText = `Фальц: ${falz.toFixed(1)} мм + добавка: ${pila.toFixed(1)} мм`;
 
             let rawPoly = null;
             let labels = [];
@@ -420,21 +522,102 @@
                 if (bot > 0 && top > 0 && lh > 0 && rh > 0) {
                     const offset = (bot - top - shift) / 2;
                     rawPoly = [
-                        {x: 0, y: 0}, 
-                        {x: bot, y: 0}, 
-                        {x: bot, y: rh}, 
-                        {x: shift + offset, y: lh}, 
+                        {x: 0, y: 0},
+                        {x: bot, y: 0},
+                        {x: bot, y: rh},
+                        {x: shift + offset, y: lh},
                         {x: offset, y: lh}
                     ];
                     labels = ['Низ', 'Правая', 'Верх', 'Скос', 'Левая'];
                     valid = true;
+                }
+            } else if (currentShape === 'rectCut') {
+                // 5-тиугольник с 3 прямыми углами
+                // Пользователь задаёт: низ (bot), лево (leftH), право (rightH), верх (top)
+                // Логика среза:
+                //   - если top < bot  -> срез в правом верхнем углу
+                //   - если top > bot  -> срез в левом верхнем углу
+                //   - если top == bot -> вырожденный случай (прямоугольник), но обработаем как top<bot с нулевым срезом
+                const bot = v('inp1'), leftH = v('inp2'), rightH = v('inp3'), top = v('inp4');
+                if (bot > 0 && leftH > 0 && rightH > 0 && top > 0) {
+                    if (top <= bot) {
+                        // срез в правом верхнем углу (3 прямых: лево-низ, право-низ, лево-верх)
+                        // Прямоугольник: левый нижний (0,0), правый нижний (bot,0),
+                        // правый верхний срезан: (bot, rightH) -> идём вверх по правой до rightH,
+                        // затем срез к (top, leftH) -- но верх должен быть горизонтальным!
+                        // Значит: (0,0) -> (bot,0) -> (bot, rightH) -> (top, rightH) -> (0, leftH)
+                        // Однако тогда верх идёт от (top, rightH) до (0, leftH) -- не горизонтален.
+                        // Правильная интерпретация: верх горизонтальный, срез — правая сторона.
+                        // Прямые углы: лево-низ, право-низ, лево-верх.
+                        // Точки: (0,0) -> (bot,0) -> (bot, rightH) -> (top, leftH)? -- нет.
+                        // Итог: (0,0) -> (bot,0) -> (top, rightH) -> (top, leftH)? 
+                        // Прямые углы должны быть: (0,0), (bot,0), (0, leftH).
+                        // Значит верх горизонтальный от (0, leftH) до (top, leftH), 
+                        // срез от (top, leftH) до (bot, rightH) -- но тогда (bot,0) не прямой к (bot,rightH)...
+                        // Верное решение: правый верхний угол срезан, верх горизонтальный от (0,leftH) до (top,leftH),
+                        // затем срез от (top,leftH) к (bot, rightH)? Нет — правый верхний угол это (bot, leftH)?
+                        // Пересматриваем: у нас 4 заданных размера. Прямоугольник bot x leftH, но правая сторона = rightH.
+                        // Если rightH < leftH: правый верхний угол срезан -> верх горизонтальный от (0,leftH) до (top,leftH),
+                        // затем срез вниз-вправо к (bot, rightH). Прямые углы: (0,0), (bot,0), (0,leftH). ✓
+                        // Требуется top <= bot.
+                        if (top > bot) {
+                            // несовместимо: при rightH<leftH срез должен быть справа -> top<=bot
+                            valid = false;
+                        } else {
+                            rawPoly = [
+                                {x: 0, y: 0},
+                                {x: bot, y: 0},
+                                {x: bot, y: rightH},
+                                {x: top, y: leftH},
+                                {x: 0, y: leftH}
+                            ];
+                            labels = ['Низ', 'Правая (низ)', 'Срез', 'Верх', 'Левая'];
+                            valid = true;
+                        }
+                    } else {
+                        // top > bot: срез в левом верхнем углу (3 прямых: лево-низ, право-низ, право-верх)
+                        // Прямоугольник bot x rightH, левая сторона = leftH (leftH < rightH)
+                        // Точки: (0,0) -> (bot,0) -> (bot, rightH) -> (0, rightH) -> срез к (0,leftH)? Нет, левый верх срезан.
+                        // Прямые: (0,0), (bot,0), (bot,rightH). Верх горизонтальный от (bot,rightH) до (shift, rightH),
+                        // затем срез вниз-влево к (0, leftH).
+                        // Требуется top = ширина верхнего горизонтального сегмента.
+                        // Срез: от (0, leftH) до (top, rightH)? Нет — верх от (top, rightH) до (bot, rightH).
+                        // Итог: (0,0) -> (bot,0) -> (bot, rightH) -> (top, rightH) -> срез к (0, leftH).
+                        // Прямые углы: (0,0), (bot,0), (bot, rightH). ✓
+                        // Требуется top <= bot.
+                        if (top > bot) {
+                            valid = false;
+                        } else {
+                            rawPoly = [
+                                {x: 0, y: 0},
+                                {x: bot, y: 0},
+                                {x: bot, y: rightH},
+                                {x: top, y: rightH},
+                                {x: 0, y: leftH}
+                            ];
+                            labels = ['Низ', 'Правая', 'Верх', 'Срез', 'Левая (низ)'];
+                            valid = true;
+                        }
+                    }
+                    if (!valid) {
+                        document.getElementById('previewBox').innerHTML = `
+                            <div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px;line-height:1.5">
+                                ⚠️ Некорректные размеры для фигуры со срезом.<br>
+                                Верх (${top}) не может быть больше низа (${bot}).
+                            </div>`;
+                        document.getElementById('resultsCard').classList.remove('active');
+                        return;
+                    }
                 }
             }
 
             if (valid && rawPoly) {
                 const innerPoly = offsetPolygon(rawPoly, falz);
                 if (!innerPoly) {
-                    document.getElementById('previewBox').innerHTML = 'Ошибка геометрии (слишком большой фальц)';
+                    document.getElementById('previewBox').innerHTML = `
+                        <div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px">
+                            Ошибка геометрии (слишком большой фальц)
+                        </div>`;
                     document.getElementById('resultsCard').classList.remove('active');
                     return;
                 }
@@ -444,10 +627,9 @@
 
                 const N = innerPoly.length;
                 for (let i = 0; i < N; i++) {
-                    const p1 = innerPoly[i];
-                    const p2 = innerPoly[(i + 1) % N];
+                    const p1 = innerPoly[i], p2 = innerPoly[(i + 1) % N];
                     const len = Math.sqrt((p2.x - p1.x)**2 + (p2.y - p1.y)**2);
-                    
+
                     const p_prev = innerPoly[(i - 1 + N) % N];
                     const p_next = innerPoly[(i + 2) % N];
                     const v1 = {x: p1.x - p_prev.x, y: p1.y - p_prev.y};
@@ -461,29 +643,28 @@
                     results.push({
                         label: labels[i] || `Сторона ${i+1}`,
                         val: len + pila,
-                        angle: Math.abs(180 - diff) / 2
+                        angle: Math.abs(180 - diff) / 2,
+                        color: SIDE_COLORS[i % SIDE_COLORS.length]
                     });
                 }
 
-                // --- ИСПРАВЛЕННОЕ ЦЕНТРИРОВАНИЕ И ОТРИСОВКА ---
+                // ---- Отрисовка ----
                 const allPts = [...transformedOuter, ...transformedInner];
                 const minX = Math.min(...allPts.map(p => p.x));
                 const maxX = Math.max(...allPts.map(p => p.x));
                 const minY = Math.min(...allPts.map(p => p.y));
                 const maxY = Math.max(...allPts.map(p => p.y));
-                
-                const wBox = maxX - minX;
-                const hBox = maxY - minY;
+
+                const wBox = maxX - minX, hBox = maxY - minY;
                 const maxDim = Math.max(wBox, hBox, 1);
-                
-                // Масштаб 0.55 гарантирует, что фигура займет ~55% от размера макета, оставляя место для подписей
                 const scale = (280 / maxDim) * 0.55;
-                
-                // Центр фигуры в координатах макета (150, 170)
+
                 const cx = 150 - ((minX + maxX) / 2) * scale;
                 const cy = 170 + ((minY + maxY) / 2) * scale;
-
                 const toSvg = (p) => ({ x: p.x * scale + cx, y: -p.y * scale + cy });
+
+                // Адаптивный отступ для подписей
+                const labelOffset = Math.max(18, Math.min(40, 600 / maxDim * 40));
 
                 let pathStr = "";
                 transformedOuter.forEach((p, i) => {
@@ -494,65 +675,93 @@
 
                 let svg = `<svg viewBox="0 0 300 340">
                     <path d="${pathStr}" fill="none" stroke="#888" stroke-width="3"/>`;
-                
+
+                // Угловые бейджи (маленькие кружки с углом)
+                for (let i = 0; i < N; i++) {
+                    const pt = toSvg(transformedInner[i]);
+                    // Сместим бейдж чуть внутрь фигуры — к центру
+                    const dx = 150 - pt.x, dy = 170 - pt.y;
+                    const dd = Math.sqrt(dx*dx + dy*dy) || 1;
+                    const bx = pt.x + (dx / dd) * 14;
+                    const by = pt.y + (dy / dd) * 14;
+                    const angTxt = Math.round(results[i].angle);
+                    if (results[i].angle > 1) {
+                        svg += `<circle cx="${bx}" cy="${by}" r="9" class="svg-angle-circle"/>
+                                <text x="${bx}" y="${by + 3}" text-anchor="middle" class="svg-angle-badge">${angTxt}°</text>`;
+                    }
+                }
+
+                // Подписи размеров
                 for (let i = 0; i < N; i++) {
                     const p1 = toSvg(transformedInner[i]);
                     const p2 = toSvg(transformedInner[(i + 1) % N]);
                     const midX = (p1.x + p2.x) / 2;
                     const midY = (p1.y + p2.y) / 2;
-                    
-                    const outX = midX - 150;
-                    const outY = midY - 170;
+
+                    const outX = midX - 150, outY = midY - 170;
                     const d = Math.sqrt(outX*outX + outY*outY) || 1;
-                    const textX = midX + (outX / d) * 35;
-                    const textY = midY + (outY / d) * 35;
+                    const textX = midX + (outX / d) * labelOffset;
+                    const textY = midY + (outY / d) * labelOffset;
 
                     let angleDeg = Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI;
                     if (angleDeg > 90) angleDeg -= 180;
                     if (angleDeg < -90) angleDeg += 180;
 
-                    svg += `<text x="${textX}" y="${textY}" class="svg-text-size" text-anchor="middle" transform="rotate(${angleDeg} ${textX} ${textY})">Р:${r(results[i].val)}</text>`;
+                    svg += `<text x="${textX}" y="${textY}" class="svg-text-size" text-anchor="middle"
+                              transform="rotate(${angleDeg} ${textX} ${textY})"
+                              fill="${results[i].color}">${r(results[i].val)}</text>`;
                 }
                 svg += `</svg>`;
                 svgContent = svg;
             }
 
             renderResults(results, valid, svgContent, subText);
+            persistState();
         }
 
+        // ---------- Рендер результатов ----------
         function renderResults(results, valid, svgContent, subText) {
             const previewBox = document.getElementById('previewBox');
             const card = document.getElementById('resultsCard');
             const sub = document.getElementById('resultsSub');
             const list = document.getElementById('resultsList');
+            const summary = document.getElementById('resultsSummary');
 
             if (!valid) {
-                previewBox.innerHTML = 'Введите корректные размеры';
+                renderEmptyPreview();
                 card.classList.remove('active');
                 return;
             }
 
             if (svgContent) previewBox.innerHTML = svgContent;
-            
+
             card.classList.add('active');
             sub.innerText = subText;
-            
+
+            // Суммарная длина
+            const total = results.reduce((s, r) => s + r.val, 0);
+            document.getElementById('sumTotal').innerText = total.toFixed(1) + ' мм';
+            document.getElementById('sumSides').innerText = results.length + ' сторон';
+            summary.style.display = 'flex';
+
             list.innerHTML = '';
             results.forEach(res => {
                 list.innerHTML += `
                     <div class="result-item">
-                        <div>
-                            <div class="result-label">${res.label}</div>
+                        <div class="side-label">
+                            <span class="side-dot" style="background:${res.color}"></span>
+                            <span class="result-label">${res.label}</span>
                         </div>
                         <div style="text-align: right;">
                             <div class="result-value">${res.val.toFixed(1)} мм</div>
-                            ${res.angle ? `<div class="result-angle">Угол: ${res.angle.toFixed(1)}°</div>` : ''}
+                            ${res.angle > 1 ? `<div class="result-angle">Угол: ${res.angle.toFixed(1)}°</div>` : ''}
                         </div>
                     </div>
                 `;
             });
         }
 
+        // ---------- Копирование / шаринг ----------
         function copyResults() {
             const list = document.getElementById('resultsList');
             const text = list.innerText;
@@ -567,9 +776,33 @@
             }
         }
 
+        function shareResults() {
+            const sub = document.getElementById('resultsSub').innerText;
+            const list = document.getElementById('resultsList').innerText;
+            const text = `📐 Размеры рамки\n${sub}\n\n${list}`;
+
+            if (tg?.showPopup) {
+                const url = `https://t.me/share/url?url=${encodeURIComponent('Калькулятор рамок')}&text=${encodeURIComponent(text)}`;
+                tg.openTelegramLink(url);
+            } else if (navigator.share) {
+                navigator.share({ title: 'Размеры рамки', text });
+            } else {
+                navigator.clipboard.writeText(text);
+                alert('Скопировано!');
+            }
+        }
+
+        // ---------- Старт ----------
         window.onload = () => {
             loadSettings();
+            const restored = restoreState();
             renderInputs();
+            if (restored) {
+                restoreInputs();
+                calculate();
+            } else {
+                renderEmptyPreview();
+            }
         };
     </script>
 </body>
