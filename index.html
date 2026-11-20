@@ -13,10 +13,10 @@
             --text-muted: var(--tg-theme-hint-color, #9ca3af);
             --border-color: rgba(148, 163, 184, 0.25);
             --accent: var(--tg-theme-link-color, #0ea5e9);
-            --accent-2: #a855f7;
             --gradient: linear-gradient(135deg, #0ea5e9, #a855f7);
             --success: #22c55e;
             --warning: #f59e0b;
+            --danger: #ef4444;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
@@ -39,7 +39,7 @@
             cursor: pointer; transition: all 0.2s; color: var(--text-muted);
         }
         .shape-btn.active { background: rgba(14,165,233,0.12); border-color: var(--accent); color: var(--accent); box-shadow: 0 0 10px rgba(14,165,233,0.25); }
-        .shape-btn svg { width: 32px; height: 32px; stroke: currentColor; fill: none; stroke-width: 2; }
+        .shape-btn svg { width: 32px; height: 32px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linejoin: round; }
 
         .preview-box {
             background: var(--card-bg); border: 1px solid var(--border-color);
@@ -50,6 +50,10 @@
         .preview-hint {
             position: absolute; bottom: 14px; left: 0; right: 0; text-align: center;
             font-size: 13px; color: var(--text-muted); pointer-events: none;
+        }
+        .preview-error {
+            padding: 20px; text-align: center; color: var(--danger);
+            font-size: 13px; line-height: 1.5;
         }
 
         .controls-row {
@@ -66,9 +70,9 @@
         .ctrl-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
         .ctrl-btn span { font-size: 10px; color: var(--text-muted); }
 
-        .svg-text-size { font-family: sans-serif; fill: var(--success); font-size: 13px; font-weight: bold; }
+        .svg-text-size { font-family: sans-serif; font-size: 13px; font-weight: bold; }
         .svg-angle-badge { font-family: sans-serif; font-size: 9px; fill: var(--warning); font-weight: 600; }
-        .svg-angle-circle { fill: rgba(245, 158, 11, 0.15); stroke: rgba(245, 158, 11, 0.5); stroke-width: 1; }
+        .svg-angle-circle { fill: rgba(245, 158, 11, 0.18); stroke: rgba(245, 158, 11, 0.55); stroke-width: 1; }
 
         .inputs-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
         .input-row { display: flex; gap: 10px; }
@@ -112,9 +116,7 @@
 
         .result-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(128,128,128,0.1); gap: 10px; }
         .result-item:last-child { border-bottom: none; padding-bottom: 0; }
-        .result-item .side-dot {
-            width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
-        }
+        .result-item .side-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
         .result-item .side-label { display: flex; align-items: center; gap: 8px; flex: 1; }
         .result-label { font-size: 14px; color: var(--text-muted); }
         .result-value { font-size: 16px; font-weight: bold; text-align: right; color: var(--text-main); }
@@ -157,7 +159,6 @@
         <div class="shape-btn" data-shape="pentagon" onclick="selectShape('pentagon')">
             <svg viewBox="0 0 24 24"><path d="M4 10 L12 4 L20 10 L20 20 L4 20 Z"/></svg>
         </div>
-        <!-- Новая фигура: 5-тиугольник с 3 прямыми углами (прямоугольник со срезом) -->
         <div class="shape-btn" data-shape="rectCut" onclick="selectShape('rectCut')">
             <svg viewBox="0 0 24 24"><path d="M4 4 L14 4 L20 10 L20 20 L4 20 Z"/></svg>
         </div>
@@ -241,7 +242,6 @@
         let rotation = 0;
         let mirror = false;
 
-        // Цвета для сторон (совпадают с точками в результатах)
         const SIDE_COLORS = ['#22c55e', '#0ea5e9', '#a855f7', '#f59e0b', '#ef4444', '#14b8a6'];
 
         // ---------- Настройки ----------
@@ -266,7 +266,7 @@
         function openSettings() { document.getElementById('settingsModal').classList.add('active'); }
         function closeSettings() { document.getElementById('settingsModal').classList.remove('active'); }
 
-        // ---------- Сохранение последнего расчёта ----------
+        // ---------- Сохранение состояния ----------
         function persistState() {
             const data = { shape: currentShape, rotation, mirror, inputs: {} };
             document.querySelectorAll('.input-group input[id^="inp"]').forEach(inp => {
@@ -321,7 +321,7 @@
             calculate();
         }
 
-        // ---------- Рендер полей ввода ----------
+        // ---------- Рендер полей ----------
         function renderInputs() {
             const container = document.getElementById('inputsContainer');
             container.innerHTML = '';
@@ -365,7 +365,6 @@
                     <div class="input-group"><label>Скос (сдвиг верха вправо, мм)</label><input type="number" id="inp5" oninput="calculate()"></div>
                 `;
             } else if (currentShape === 'rectCut') {
-                // 5-тиугольник с 3 прямыми углами (прямоугольник со срезом одного угла)
                 container.innerHTML = `
                     <div class="input-group"><label>Низ (мм)</label><input type="number" id="inp1" oninput="calculate()"></div>
                     <div class="input-row">
@@ -480,6 +479,7 @@
 
             let rawPoly = null;
             let labels = [];
+            let geomError = null;
 
             if (currentShape === 'trapezoid') {
                 const b = v('inp1'), t = v('inp2'), h = v('inp3');
@@ -532,93 +532,46 @@
                     valid = true;
                 }
             } else if (currentShape === 'rectCut') {
-                // 5-тиугольник с 3 прямыми углами
-                // Пользователь задаёт: низ (bot), лево (leftH), право (rightH), верх (top)
-                // Логика среза:
-                //   - если top < bot  -> срез в правом верхнем углу
-                //   - если top > bot  -> срез в левом верхнем углу
-                //   - если top == bot -> вырожденный случай (прямоугольник), но обработаем как top<bot с нулевым срезом
+                // 5-тиугольник с 3 прямыми углами (срез в правом верхнем углу)
+                // Пользователь: низ, лево, право, верх
+                // Прямые углы: лево-низ (0,0), право-низ (bot,0), лево-верх (0, leftH)
+                // Срез: от (top, leftH) до (bot, rightH)
+                // Валидация: top <= bot (верх не может быть шире низа)
                 const bot = v('inp1'), leftH = v('inp2'), rightH = v('inp3'), top = v('inp4');
                 if (bot > 0 && leftH > 0 && rightH > 0 && top > 0) {
-                    if (top <= bot) {
-                        // срез в правом верхнем углу (3 прямых: лево-низ, право-низ, лево-верх)
-                        // Прямоугольник: левый нижний (0,0), правый нижний (bot,0),
-                        // правый верхний срезан: (bot, rightH) -> идём вверх по правой до rightH,
-                        // затем срез к (top, leftH) -- но верх должен быть горизонтальным!
-                        // Значит: (0,0) -> (bot,0) -> (bot, rightH) -> (top, rightH) -> (0, leftH)
-                        // Однако тогда верх идёт от (top, rightH) до (0, leftH) -- не горизонтален.
-                        // Правильная интерпретация: верх горизонтальный, срез — правая сторона.
-                        // Прямые углы: лево-низ, право-низ, лево-верх.
-                        // Точки: (0,0) -> (bot,0) -> (bot, rightH) -> (top, leftH)? -- нет.
-                        // Итог: (0,0) -> (bot,0) -> (top, rightH) -> (top, leftH)? 
-                        // Прямые углы должны быть: (0,0), (bot,0), (0, leftH).
-                        // Значит верх горизонтальный от (0, leftH) до (top, leftH), 
-                        // срез от (top, leftH) до (bot, rightH) -- но тогда (bot,0) не прямой к (bot,rightH)...
-                        // Верное решение: правый верхний угол срезан, верх горизонтальный от (0,leftH) до (top,leftH),
-                        // затем срез от (top,leftH) к (bot, rightH)? Нет — правый верхний угол это (bot, leftH)?
-                        // Пересматриваем: у нас 4 заданных размера. Прямоугольник bot x leftH, но правая сторона = rightH.
-                        // Если rightH < leftH: правый верхний угол срезан -> верх горизонтальный от (0,leftH) до (top,leftH),
-                        // затем срез вниз-вправо к (bot, rightH). Прямые углы: (0,0), (bot,0), (0,leftH). ✓
-                        // Требуется top <= bot.
-                        if (top > bot) {
-                            // несовместимо: при rightH<leftH срез должен быть справа -> top<=bot
-                            valid = false;
-                        } else {
-                            rawPoly = [
-                                {x: 0, y: 0},
-                                {x: bot, y: 0},
-                                {x: bot, y: rightH},
-                                {x: top, y: leftH},
-                                {x: 0, y: leftH}
-                            ];
-                            labels = ['Низ', 'Правая (низ)', 'Срез', 'Верх', 'Левая'];
-                            valid = true;
-                        }
+                    if (top > bot) {
+                        geomError = `Верх (${top}) не может быть больше низа (${bot}).`;
+                    } else if (rightH >= leftH) {
+                        geomError = `Правая сторона (${rightH}) должна быть меньше левой (${leftH}) — иначе срез не образуется.`;
                     } else {
-                        // top > bot: срез в левом верхнем углу (3 прямых: лево-низ, право-низ, право-верх)
-                        // Прямоугольник bot x rightH, левая сторона = leftH (leftH < rightH)
-                        // Точки: (0,0) -> (bot,0) -> (bot, rightH) -> (0, rightH) -> срез к (0,leftH)? Нет, левый верх срезан.
-                        // Прямые: (0,0), (bot,0), (bot,rightH). Верх горизонтальный от (bot,rightH) до (shift, rightH),
-                        // затем срез вниз-влево к (0, leftH).
-                        // Требуется top = ширина верхнего горизонтального сегмента.
-                        // Срез: от (0, leftH) до (top, rightH)? Нет — верх от (top, rightH) до (bot, rightH).
-                        // Итог: (0,0) -> (bot,0) -> (bot, rightH) -> (top, rightH) -> срез к (0, leftH).
-                        // Прямые углы: (0,0), (bot,0), (bot, rightH). ✓
-                        // Требуется top <= bot.
-                        if (top > bot) {
-                            valid = false;
-                        } else {
-                            rawPoly = [
-                                {x: 0, y: 0},
-                                {x: bot, y: 0},
-                                {x: bot, y: rightH},
-                                {x: top, y: rightH},
-                                {x: 0, y: leftH}
-                            ];
-                            labels = ['Низ', 'Правая', 'Верх', 'Срез', 'Левая (низ)'];
-                            valid = true;
-                        }
-                    }
-                    if (!valid) {
-                        document.getElementById('previewBox').innerHTML = `
-                            <div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px;line-height:1.5">
-                                ⚠️ Некорректные размеры для фигуры со срезом.<br>
-                                Верх (${top}) не может быть больше низа (${bot}).
-                            </div>`;
-                        document.getElementById('resultsCard').classList.remove('active');
-                        return;
+                        rawPoly = [
+                            {x: 0, y: 0},
+                            {x: bot, y: 0},
+                            {x: bot, y: rightH},
+                            {x: top, y: leftH},
+                            {x: 0, y: leftH}
+                        ];
+                        labels = ['Низ', 'Правая (до среза)', 'Срез', 'Верх', 'Левая'];
+                        valid = true;
                     }
                 }
+            }
+
+            if (geomError) {
+                document.getElementById('previewBox').innerHTML =
+                    `<div class="preview-error">⚠️ ${geomError}</div>`;
+                document.getElementById('resultsCard').classList.remove('active');
+                persistState();
+                return;
             }
 
             if (valid && rawPoly) {
                 const innerPoly = offsetPolygon(rawPoly, falz);
                 if (!innerPoly) {
-                    document.getElementById('previewBox').innerHTML = `
-                        <div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px">
-                            Ошибка геометрии (слишком большой фальц)
-                        </div>`;
+                    document.getElementById('previewBox').innerHTML =
+                        `<div class="preview-error">⚠️ Ошибка геометрии — слишком большой фальц или некорректные размеры.</div>`;
                     document.getElementById('resultsCard').classList.remove('active');
+                    persistState();
                     return;
                 }
 
@@ -648,23 +601,27 @@
                     });
                 }
 
-                // ---- Отрисовка ----
+                // ---- Отрисовка с корректным вписыванием по обеим осям ----
+                const VB_W = 300, VB_H = 340;
                 const allPts = [...transformedOuter, ...transformedInner];
                 const minX = Math.min(...allPts.map(p => p.x));
                 const maxX = Math.max(...allPts.map(p => p.x));
                 const minY = Math.min(...allPts.map(p => p.y));
                 const maxY = Math.max(...allPts.map(p => p.y));
 
-                const wBox = maxX - minX, hBox = maxY - minY;
-                const maxDim = Math.max(wBox, hBox, 1);
-                const scale = (280 / maxDim) * 0.55;
+                const wBox = Math.max(maxX - minX, 1);
+                const hBox = Math.max(maxY - minY, 1);
+                // Оставляем ~22% на каждую сторону под подписи
+                const usableW = VB_W * 0.72;
+                const usableH = VB_H * 0.72;
+                const scale = Math.min(usableW / wBox, usableH / hBox);
 
-                const cx = 150 - ((minX + maxX) / 2) * scale;
-                const cy = 170 + ((minY + maxY) / 2) * scale;
+                const cx = VB_W / 2 - ((minX + maxX) / 2) * scale;
+                const cy = VB_H / 2 + ((minY + maxY) / 2) * scale;
                 const toSvg = (p) => ({ x: p.x * scale + cx, y: -p.y * scale + cy });
 
-                // Адаптивный отступ для подписей
-                const labelOffset = Math.max(18, Math.min(40, 600 / maxDim * 40));
+                const maxSide = Math.max(wBox, hBox);
+                const labelOffset = Math.max(16, Math.min(38, 220 / maxSide * 22));
 
                 let pathStr = "";
                 transformedOuter.forEach((p, i) => {
@@ -673,32 +630,30 @@
                 });
                 pathStr += "Z";
 
-                let svg = `<svg viewBox="0 0 300 340">
-                    <path d="${pathStr}" fill="none" stroke="#888" stroke-width="3"/>`;
+                let svg = `<svg viewBox="0 0 ${VB_W} ${VB_H}">
+                    <path d="${pathStr}" fill="none" stroke="#888" stroke-width="3" stroke-linejoin="round"/>`;
 
-                // Угловые бейджи (маленькие кружки с углом)
+                // Угловые бейджи
                 for (let i = 0; i < N; i++) {
                     const pt = toSvg(transformedInner[i]);
-                    // Сместим бейдж чуть внутрь фигуры — к центру
-                    const dx = 150 - pt.x, dy = 170 - pt.y;
+                    const dx = VB_W / 2 - pt.x, dy = VB_H / 2 - pt.y;
                     const dd = Math.sqrt(dx*dx + dy*dy) || 1;
                     const bx = pt.x + (dx / dd) * 14;
                     const by = pt.y + (dy / dd) * 14;
-                    const angTxt = Math.round(results[i].angle);
                     if (results[i].angle > 1) {
                         svg += `<circle cx="${bx}" cy="${by}" r="9" class="svg-angle-circle"/>
-                                <text x="${bx}" y="${by + 3}" text-anchor="middle" class="svg-angle-badge">${angTxt}°</text>`;
+                                <text x="${bx}" y="${by + 3}" text-anchor="middle" class="svg-angle-badge">${Math.round(results[i].angle)}°</text>`;
                     }
                 }
 
-                // Подписи размеров
+                // Подписи сторон
                 for (let i = 0; i < N; i++) {
                     const p1 = toSvg(transformedInner[i]);
                     const p2 = toSvg(transformedInner[(i + 1) % N]);
                     const midX = (p1.x + p2.x) / 2;
                     const midY = (p1.y + p2.y) / 2;
 
-                    const outX = midX - 150, outY = midY - 170;
+                    const outX = midX - VB_W / 2, outY = midY - VB_H / 2;
                     const d = Math.sqrt(outX*outX + outY*outY) || 1;
                     const textX = midX + (outX / d) * labelOffset;
                     const textY = midY + (outY / d) * labelOffset;
@@ -707,9 +662,9 @@
                     if (angleDeg > 90) angleDeg -= 180;
                     if (angleDeg < -90) angleDeg += 180;
 
-                    svg += `<text x="${textX}" y="${textY}" class="svg-text-size" text-anchor="middle"
+                    svg += `<text x="${textX}" y="${textY}" text-anchor="middle"
                               transform="rotate(${angleDeg} ${textX} ${textY})"
-                              fill="${results[i].color}">${r(results[i].val)}</text>`;
+                              class="svg-text-size" fill="${results[i].color}">${r(results[i].val)}</text>`;
                 }
                 svg += `</svg>`;
                 svgContent = svg;
@@ -728,7 +683,7 @@
             const summary = document.getElementById('resultsSummary');
 
             if (!valid) {
-                renderEmptyPreview();
+                if (!document.querySelector('.preview-error')) renderEmptyPreview();
                 card.classList.remove('active');
                 return;
             }
@@ -738,7 +693,6 @@
             card.classList.add('active');
             sub.innerText = subText;
 
-            // Суммарная длина
             const total = results.reduce((s, r) => s + r.val, 0);
             document.getElementById('sumTotal').innerText = total.toFixed(1) + ' мм';
             document.getElementById('sumSides').innerText = results.length + ' сторон';
